@@ -1,3 +1,5 @@
+// https://github.com/ExampleDriven/spring-boot-thrift-example
+
 buildscript {
 	ext {
 		springBootVersion = '2.1.0.BUILD-SNAPSHOT'
@@ -6,9 +8,11 @@ buildscript {
 		mavenCentral()
 		maven { url "https://repo.spring.io/snapshot" }
 		maven { url "https://repo.spring.io/milestone" }
+		maven { url "https://plugins.gradle.org/m2" }
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath("gradle.plugin.org.jruyi.gradle:thrift-gradle-plugin:0.4.0")
 	}
 }
 
@@ -16,6 +20,7 @@ apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: "org.jruyi.thrift"
 
 group = 'ru.glosav.gais'
 version = '0.0.1-SNAPSHOT'
@@ -27,7 +32,6 @@ repositories {
 	maven { url "https://repo.spring.io/milestone" }
 }
 
-
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-actuator')
 	compile('org.springframework.boot:spring-boot-starter-jersey')
@@ -36,9 +40,55 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-quartz')
 	compile('org.springframework.boot:spring-boot-starter-webflux')
 	compile('org.springframework.retry:spring-retry')
-	runtime('org.postgresql:postgresql')
+    compile('org.apache.thrift:libthrift:0.11.0')
+	compile('org.postgresql:postgresql')
 	compileOnly('org.springframework.boot:spring-boot-configuration-processor')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('io.projectreactor:reactor-test')
 	testCompile('org.springframework.restdocs:spring-restdocs-mockmvc')
+}
+
+ext {
+    title = 'Thrift Gradle Plugin Test'
+    organizationId = 'org.jruyi'
+    organizationName = 'JRuyi.org'
+    organizationUrl = 'http://www.jruyi.org/'
+
+    licenseName = 'Apache License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+
+    createdBy = "${System.getProperty('java.version')} (${System.getProperty('java.vm.vendor')})"
+}
+
+compileThrift {
+    thriftExecutable "thrift"
+    sourceDir "src/main/thrift"
+    outputDir "$buildDir/gen-src"
+
+    nowarn true
+    strict true
+    verbose true
+    recurse true
+    debug true
+    allowNegKeys true
+    allow64bitsConsts true
+    createGenFolder false
+
+    generator 'java', 'private-members'
+}
+
+jar {
+    manifest {
+        attributes(
+                'Specification-Title': title,
+                'Specification-Version': version,
+                'Specification-Vendor': organizationName,
+                'Implementation-Title': title,
+                'Implementation-Version': version,
+                'Implementation-Vendor': organizationName,
+                'Implementation-Vendor-Id': organizationId,
+                'Implementation-Vendor-URL': organizationUrl,
+                'Created-By': createdBy,
+        )
+    }
 }
