@@ -35,8 +35,8 @@ repositories {
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-actuator')
 	compile('org.springframework.boot:spring-boot-starter-jersey')
-	compile('org.springframework.boot:spring-boot-starter-jta-atomikos')
-	compile('org.springframework.boot:spring-boot-starter-mail')
+	//compile('org.springframework.boot:spring-boot-starter-jta-atomikos')
+	//compile('org.springframework.boot:spring-boot-starter-mail')
 	compile('org.springframework.boot:spring-boot-starter-quartz')
 	compile('org.springframework.boot:spring-boot-starter-webflux')
 	compile('org.springframework.retry:spring-retry')
@@ -49,10 +49,10 @@ dependencies {
 }
 
 ext {
-    title = 'Thrift Gradle Plugin Test'
-    organizationId = 'org.jruyi'
-    organizationName = 'JRuyi.org'
-    organizationUrl = 'http://www.jruyi.org/'
+    title = 'Glosav Gais Gateway'
+    organizationId = 'ru.glosav'
+    organizationName = 'glosav.ru'
+    organizationUrl = 'http://www.glosav.ru/'
 
     licenseName = 'Apache License, Version 2.0'
     licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
