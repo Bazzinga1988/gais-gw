@@ -1,5 +1,6 @@
 package ru.glosav.gais.gateway.dto;
 
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -8,6 +9,7 @@ import java.util.Set;
 
 @Data
 @Entity
+@ApiModel(value="Company", description="Модель данных описывающая компанию")
 public class Company {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

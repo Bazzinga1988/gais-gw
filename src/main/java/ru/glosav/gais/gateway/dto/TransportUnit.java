@@ -1,6 +1,7 @@
 package ru.glosav.gais.gateway.dto;
 
 
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -8,6 +9,7 @@ import javax.validation.constraints.NotNull;
 
 @Data
 @Entity
+@ApiModel(value="TransportUnit", description="Модель данных описывающая транспортное средство")
 public class TransportUnit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

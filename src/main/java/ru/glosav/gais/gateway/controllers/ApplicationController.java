@@ -3,8 +3,10 @@ package ru.glosav.gais.gateway.controllers;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
@@ -23,7 +25,7 @@ import javax.validation.constraints.NotNull;
 public class ApplicationController {
     Logger log = LoggerFactory.getLogger(ApplicationController.class);
 
-    @Repository
+    @Autowired
     ApplicationRepository repository;
 
     @ApiOperation(value = "Регистрация заявки в ГАИС")

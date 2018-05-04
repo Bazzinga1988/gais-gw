@@ -1,8 +1,12 @@
 STOP INSTALLING POSTGRES ON YOUR LAPTOP : USE DOCKER INSTEAD
 
+https://docs.spring.io/spring-data/jpa/docs/current/reference/html/
+
 https://blog.dahanne.net/2015/01/19/stop-installing-postgres-on-your-laptop-use-docker-instead/
 
 http://www.baeldung.com/swagger-2-documentation-for-spring-rest-api
+
+https://github.com/swagger-api/swagger-core/wiki/annotations
 
 https://dzone.com/articles/using-yaml-in-spring-boot-to-configure-logback?fromrel=true
 
@@ -11,3 +15,15 @@ https://dzone.com/articles/integrating-spring-data-jpa-postgresql-and-liquiba?fr
 http://localhost:8585/application/test
 
 http://localhost:8585/swagger-ui.html
+
+
+PostgreSQL
+
+docker run -p 5432:5432 --name postgres -e POSTGRES_PASSWORD=postgres -d postgres
+
+createdb -h localhost -p 5432 -U postgres ggdb postgres
+
+
+docker kill postgres
+
+docker rm postgres

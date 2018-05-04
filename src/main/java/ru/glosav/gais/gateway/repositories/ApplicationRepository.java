@@ -6,5 +6,5 @@ import ru.glosav.gais.gateway.dto.Application;
 import java.util.List;
 
 public interface ApplicationRepository extends CrudRepository<Application, Long> {
-    List<Application> findByName(String name);
+    List<Application> findByNumber(String number);
 }
