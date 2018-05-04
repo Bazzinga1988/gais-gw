@@ -1,0 +1,37 @@
+server:
+  port: 8585
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.PostgreSQL95Dialect
+    show-sql: true
+    properties:
+      hibernate:
+        temp:
+          # Fix Postgres JPA Error:
+          # Method org.postgresql.jdbc.PgConnection.createClob() is not yet implemented.
+          use_jdbc_metadata_defaults: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ggdb
+    username: postgres
+    password: postgres
+
+
+gaisclient:
+    group: "Тест Российские перевозчики"
+    host: 193.232.47.4
+    port: 19991
+    login: agent_test
+    password: test123
+    ssl:
+        enabled: true
+        truststore: okp_new.jks
+        passphrase: okp_pass
+    ts:
+        color: #00ffff
+        icon: 7
+logging:
+  level:
+    ru.glosav.gais.gateway: debug

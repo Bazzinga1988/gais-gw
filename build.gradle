@@ -2,29 +2,45 @@
 
 buildscript {
 	ext {
-		springBootVersion = '2.1.0.BUILD-SNAPSHOT'
+		//springBootVersion = '2.1.0.BUILD-SNAPSHOT'
+		springBootVersion = '2.0.1.RELEASE'
 	}
 	repositories {
 		mavenCentral()
 		maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/release" }
 		maven { url "https://repo.spring.io/milestone" }
 		maven { url "https://plugins.gradle.org/m2" }
 	}
 	dependencies {
-		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("io.franzbecker:gradle-lombok:1.13")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
 		classpath("gradle.plugin.org.jruyi.gradle:thrift-gradle-plugin:0.4.0")
+		classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.7")
 	}
 }
 
+
 apply plugin: 'java'
+apply plugin: "io.franzbecker.gradle-lombok"
 apply plugin: 'idea'
+apply plugin: 'maven'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: "org.jruyi.thrift"
+apply plugin: 'org.asciidoctor.convert'
 
 group = 'ru.glosav.gais'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+bootJar {
+    launchScript() {
+        properties 'initInfoProvides': rootProject.name
+    }
+}
+
 
 repositories {
 	mavenCentral()
@@ -34,18 +50,34 @@ repositories {
 
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-actuator')
+	compile('org.springframework.boot:spring-boot-starter-data-jpa')
+	compile('org.springframework.boot:spring-boot-starter-web')
+	compile('org.springframework.boot:spring-boot-starter-webflux')
 	compile('org.springframework.boot:spring-boot-starter-jersey')
 	//compile('org.springframework.boot:spring-boot-starter-jta-atomikos')
-	//compile('org.springframework.boot:spring-boot-starter-mail')
+	compile('org.springframework.boot:spring-boot-starter-mail')
 	compile('org.springframework.boot:spring-boot-starter-quartz')
-	compile('org.springframework.boot:spring-boot-starter-webflux')
+    compile("io.dropwizard.metrics:metrics-core")
+	//compile('org.springframework.restdocs:spring-restdocs-mockmvc')
+
 	compile('org.springframework.retry:spring-retry')
     compile('org.apache.thrift:libthrift:0.11.0')
 	compile('org.postgresql:postgresql')
+
+    // Генерация документации REST-сервисов
+    compile group: 'org.springframework.restdocs', name: 'spring-restdocs-core', version: "${springBootVersion}"
+    compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.8.0'
+    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.8.0'
+
 	compileOnly('org.springframework.boot:spring-boot-configuration-processor')
+    compileOnly('org.projectlombok:lombok:1.16.20')
+
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('io.projectreactor:reactor-test')
-	testCompile('org.springframework.restdocs:spring-restdocs-mockmvc')
+
+    asciidoctor group: 'org.springframework.restdocs', name: 'spring-restdocs-asciidoctor', version: "${springBootVersion}"
+    testCompile group: 'org.springframework.restdocs', name: 'spring-restdocs-mockmvc'
+
 }
 
 ext {
@@ -58,6 +90,8 @@ ext {
     licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
 
     createdBy = "${System.getProperty('java.version')} (${System.getProperty('java.vm.vendor')})"
+
+    snippetsDir = file('build/generated-snippets')
 }
 
 compileThrift {
@@ -72,12 +106,51 @@ compileThrift {
     debug true
     allowNegKeys true
     allow64bitsConsts true
-    createGenFolder false
+    createGenFolder true
 
     generator 'java', 'private-members'
 }
 
+test {
+    outputs.dir snippetsDir
+}
+
+
+asciidoctor {
+    dependsOn test
+    backends = ['html5']
+    options doctype: 'book'
+
+    attributes = [
+            'source-highlighter': 'highlightjs',
+            'imagesdir'         : './images',
+            'toc'               : 'left',
+            'toclevels'         : 3,
+            'numbered'          : '',
+            'icons'             : 'font',
+            'setanchors'        : '',
+            'idprefix'          : '',
+            'idseparator'       : '-',
+            'docinfo1'          : '',
+            'safe-mode-unsafe'  : '',
+            'allow-uri-read'    : '',
+            'snippets'          : snippetsDir,
+            linkattrs           : true,
+            encoding            : 'utf-8'
+    ]
+
+    inputs.dir snippetsDir
+    sourceDir 'src/main/asciidoc'
+    // outputDir 'build/asciidoc'
+    outputDir 'src/main/resources/static'
+    //sources {
+    //	include 'index.adoc'
+    //}
+}
+
 jar {
+    dependsOn asciidoctor
+
     manifest {
         attributes(
                 'Specification-Title': title,
@@ -90,5 +163,34 @@ jar {
                 'Implementation-Vendor-URL': organizationUrl,
                 'Created-By': createdBy,
         )
+    }
+
+    from("${asciidoctor.outputDir}/html5") {
+        include '**/index.html'
+        include '**/images/*'
+        into 'static/docs'
+    }
+
+}
+
+uploadArchives {
+    dependsOn 'clean'
+    dependsOn 'build'
+    tasks.findByName('build').mustRunAfter 'clean'
+    repositories {
+        mavenDeployer {
+            addFilter('jar') { artifact, file ->
+                println "Uploadling: ${artifact}, ${file}"
+                return true
+            }
+            repository(
+                    url: "${nexusUrl}/content/repositories/glosav-release") {
+                authentication(userName: nexusUsername, password: nexusPassword)
+            }
+            snapshotRepository(
+                    url: "${nexusUrl}/content/repositories/glosav-snapshot") {
+                authentication(userName: nexusUsername, password: nexusPassword)
+            }
+        }
     }
 }

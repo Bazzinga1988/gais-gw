@@ -1,0 +1,13 @@
+STOP INSTALLING POSTGRES ON YOUR LAPTOP : USE DOCKER INSTEAD
+
+https://blog.dahanne.net/2015/01/19/stop-installing-postgres-on-your-laptop-use-docker-instead/
+
+http://www.baeldung.com/swagger-2-documentation-for-spring-rest-api
+
+https://dzone.com/articles/using-yaml-in-spring-boot-to-configure-logback?fromrel=true
+
+https://dzone.com/articles/integrating-spring-data-jpa-postgresql-and-liquiba?fromrel=true
+
+http://localhost:8585/application/test
+
+http://localhost:8585/swagger-ui.html
