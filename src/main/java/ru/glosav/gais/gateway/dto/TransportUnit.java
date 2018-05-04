@@ -33,12 +33,16 @@ public class TransportUnit {
     @ApiModelProperty(value = "VIN транспортного средства")
     private String vin;
     @NotNull
+    @ApiModelProperty(value = "Реестровый номер категорированного транспортного средства")
     private String rnumber;
     @NotNull
+    @ApiModelProperty(value = "Идентификационный номер (IMEI) и модель АСН")
     private String imei;
     @NotNull
+    @ApiModelProperty(value = "ICCID USIM-карты")
     private String iccid;
     @NotNull
+    @ApiModelProperty(value = "Абонентский номер USIM-карты")
     private String msisdn;
 
 }

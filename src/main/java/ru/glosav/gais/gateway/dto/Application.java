@@ -1,6 +1,7 @@
 package ru.glosav.gais.gateway.dto;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -18,12 +19,16 @@ public class Application {
     @NotNull
     private String sessionId;
     @NotNull
+    @ApiModelProperty(value = "Номер заявки")
     private String number;
     @NotNull
+    @ApiModelProperty(value = "Дата заявки")
     private Instant date;
     private Instant sended;
     @NotNull
+    @ApiModelProperty(value = "Документ - основание заявки")
     private String base; // основание
+    @ApiModelProperty(value = "Заявляемая компания")
     @NotNull
     @ManyToOne
     private Company company;
