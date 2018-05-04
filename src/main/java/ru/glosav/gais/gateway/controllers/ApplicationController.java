@@ -36,6 +36,7 @@ public class ApplicationController {
             @NotNull
             @RequestBody Application application) {
         log.debug("ApplicationController.register: {}", application);
+        Session session = new Session();
         repository.save(application);
         return ResponseEntity.ok(new Session());
     }

@@ -2,6 +2,7 @@ package ru.glosav.gais.gateway.dto;
 
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -20,12 +21,16 @@ public class TransportUnit {
     @NotNull
     private String sessionId;
     @NotNull
+    @ApiModelProperty(value = "Государственный регистрационный знак")
     private String grn;
     @NotNull
+    @ApiModelProperty(value = "Марка транспортного средства")
     private String type; // марка
     @NotNull
+    @ApiModelProperty(value = "Модель транспортного средства")
     private String model;
     @NotNull
+    @ApiModelProperty(value = "VIN транспортного средства")
     private String vin;
     @NotNull
     private String rnumber;
