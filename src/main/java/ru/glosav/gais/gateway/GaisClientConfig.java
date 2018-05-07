@@ -17,8 +17,14 @@ public class GaisClientConfig {
     private String passphrase;
     @Value("${gaisclient.host}")
     private String host;
+    @Value("${gaisclient.group}")
+    private String group;
     @Value("${gaisclient.port}")
     private int port;
+    @Value("${gaisclient.login}")
+    private String login;
+    @Value("${gaisclient.password}")
+    private String password;
 
     @Bean
     public TProtocolFactory tProtocolFactory() {
@@ -27,7 +33,9 @@ public class GaisClientConfig {
 
     @Bean
     TSocket tSocket(TSSLTransportFactory.TSSLTransportParameters tSSLTransportParameters) throws TTransportException {
-        return TSSLTransportFactory.getClientSocket(host, port, 5000, tSSLTransportParameters);
+        TSocket socket = TSSLTransportFactory.getClientSocket(host, port, 5000, tSSLTransportParameters);
+
+        return socket;
     }
 
     @Bean

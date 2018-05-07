@@ -14,10 +14,12 @@ public class Session {
     private String id;
     @NotNull
     @ApiModelProperty(value = "Дата и время создания сессии")
-    public Instant created;
+    private Instant created;
     @NotNull
     @ApiModelProperty(value = "ID заявки")
-    public long appId;
+    private long appId;
+    @NotNull
+    private boolean handled = false;
 
     public Session() {
         this.id = UUID.randomUUID().toString();
@@ -32,7 +34,6 @@ public class Session {
         return created;
     }
 
-
     public long getAppId() {
         return appId;
     }
@@ -41,4 +42,21 @@ public class Session {
         this.appId = appId;
     }
 
+    public boolean isHandled() {
+        return handled;
+    }
+
+    public void setHandled(boolean handled) {
+        this.handled = handled;
+    }
+
+    @Override
+    public String toString() {
+        return "Session{" +
+                "id='" + id + '\'' +
+                ", created=" + created +
+                ", appId=" + appId +
+                ", handled=" + handled +
+                '}';
+    }
 }

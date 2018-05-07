@@ -21,10 +21,13 @@ spring:
 
 gaisclient:
     group: "Тест Российские перевозчики"
-    host: 193.232.47.4
+    host: 10.77.205.98
     port: 19991
-    login: agent_test
-    password: test123
+    login: testintegration
+    password: testintegration
+    transfer:
+      job:
+        interval: 5
     ssl:
         enabled: true
         truststore: okp_new.jks
