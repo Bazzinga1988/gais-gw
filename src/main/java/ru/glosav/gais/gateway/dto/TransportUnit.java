@@ -9,6 +9,7 @@ import lombok.Data;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
+
 @Data
 @Entity
 @ApiModel(value="TransportUnit", description="Модель данных описывающая транспортное средство")
@@ -17,9 +18,12 @@ public class TransportUnit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     private long id;
-    @ManyToOne
-    @JoinColumn(name = "company_fk", insertable=false, updatable=false)
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
     private Company company;
+
     @JsonIgnore
     private String sessionId;
     @NotNull

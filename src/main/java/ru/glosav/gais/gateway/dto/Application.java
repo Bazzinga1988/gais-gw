@@ -31,12 +31,12 @@ public class Application {
     @ApiModelProperty(value = "Дата заявки, формат dd.MM.yyyy", example = "25.04.2018")
     @DateTimeFormat(pattern="dd.MM.yyyy", iso = DateTimeFormat.ISO.DATE)
     @JsonFormat(pattern="dd.MM.yyyy", shape = JsonFormat.Shape.STRING)
-    private Instant appDate;
+    private Date appDate;
     @NotNull
     @ApiModelProperty(value = "Документ - основание заявки")
     private String base; // основание
     @ApiModelProperty(value = "Заявляемая компания")
     @NotNull
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST})
     private Company company;
 }

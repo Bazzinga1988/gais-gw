@@ -3,20 +3,18 @@ package ru.glosav.gais.gateway.controllers;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 import ru.glosav.gais.gateway.dto.Application;
 import ru.glosav.gais.gateway.dto.Company;
 import ru.glosav.gais.gateway.dto.Session;
 import ru.glosav.gais.gateway.repositories.ApplicationRepository;
+import ru.glosav.gais.gateway.repositories.SessionRepository;
 
-import javax.annotation.Resource;
 import javax.validation.constraints.NotNull;
 
 @RestController
@@ -26,7 +24,10 @@ public class ApplicationController {
     Logger log = LoggerFactory.getLogger(ApplicationController.class);
 
     @Autowired
-    ApplicationRepository repository;
+    ApplicationRepository applicationRepository;
+
+    @Autowired
+    SessionRepository sessionRepository;
 
     @ApiOperation(value = "Сервис регистрации заявки в ГАИС")
     @PostMapping(value = { "/register"},
@@ -37,8 +38,10 @@ public class ApplicationController {
             @RequestBody Application application) {
         log.debug("ApplicationController.register: {}", application);
         Session session = new Session();
-        repository.save(application);
-        return ResponseEntity.ok(new Session());
+        application.setSessionId(session.getId());
+        sessionRepository.save(session);
+        applicationRepository.save(application);
+        return ResponseEntity.ok(session);
     }
 
     @ApiOperation(value = "Тестовый метод")

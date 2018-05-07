@@ -7,6 +7,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -48,9 +49,9 @@ public class Company {
     @ApiModelProperty(value = "Корреспонденский счет компании")
     private String corrAccount;
     @NotNull
-    @OneToMany
-    @JoinColumn(name = "company_fk")
+    @OneToMany(mappedBy = "company", cascade = {CascadeType.PERSIST}, orphanRemoval = true)
+    // @JoinColumn(name = "company_id")
     @ApiModelProperty(value = "Список регистрируемых транспортных средств компании")
-    private Set<TransportUnit> units;
+    private List<TransportUnit> units;
 
 }
