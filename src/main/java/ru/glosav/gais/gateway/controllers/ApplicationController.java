@@ -28,7 +28,7 @@ public class ApplicationController {
     @Autowired
     ApplicationRepository repository;
 
-    @ApiOperation(value = "Регистрация заявки в ГАИС")
+    @ApiOperation(value = "Сервис регистрации заявки в ГАИС")
     @PostMapping(value = { "/register"},
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<?> register(

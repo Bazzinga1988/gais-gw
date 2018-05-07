@@ -1,6 +1,7 @@
 package ru.glosav.gais.gateway.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -14,11 +15,12 @@ import javax.validation.constraints.NotNull;
 public class TransportUnit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
     private long id;
     @ManyToOne
     @JoinColumn(name = "company_fk", insertable=false, updatable=false)
-    private Company application;
-    @NotNull
+    private Company company;
+    @JsonIgnore
     private String sessionId;
     @NotNull
     @ApiModelProperty(value = "Государственный регистрационный знак")
