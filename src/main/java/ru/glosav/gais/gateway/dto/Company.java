@@ -18,6 +18,8 @@ public class Company {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     private long id;
+
+
     @NotNull
     @ApiModelProperty(value = "Название компании")
     private String name;
