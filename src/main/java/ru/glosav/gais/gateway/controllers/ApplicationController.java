@@ -31,7 +31,7 @@ public class ApplicationController {
     @ApiOperation(value = "Сервис регистрации заявки в ГАИС")
     @PostMapping(value = { "/register"},
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<?> register(
+    public ResponseEntity<Session> register(
             @ApiParam(value = "Объект заявки", required = true)
             @NotNull
             @RequestBody Application application) {

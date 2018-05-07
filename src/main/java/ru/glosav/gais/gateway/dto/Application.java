@@ -24,6 +24,7 @@ public class Application {
     @NotNull
     private String sessionId;
     @NotNull
+    @Column(unique = true)
     @ApiModelProperty(value = "Номер заявки")
     private String number;
     @NotNull

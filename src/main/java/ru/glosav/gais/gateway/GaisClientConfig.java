@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class GatewayConfig {
+public class GaisClientConfig {
     @Value("${gaisclient.ssl.truststore}")
     private String keyStore;
     @Value("${gaisclient.ssl.passphrase}")
