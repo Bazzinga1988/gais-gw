@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @Data
 public class GaisClientConfig {
+    @Value("${gaisclient.ssl.enabled}")
+    private boolean sslEnabled;
     @Value("${gaisclient.ssl.truststore}")
     private String keyStore;
     @Value("${gaisclient.ssl.passphrase}")

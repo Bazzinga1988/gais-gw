@@ -47,7 +47,15 @@ public class GaisConnectorService {
     }
     public void connect() throws TException {
         log.debug("GiasConnectorService.connect");
-        socket = TSSLTransportFactory.getClientSocket(cfg.getHost(), cfg.getPort(), 5000, tSSLTransportParameters);
+        if(cfg.isSslEnabled()) {
+            log.debug("Use SSL socket");
+            socket = TSSLTransportFactory.getClientSocket(cfg.getHost(), cfg.getPort(), 5000, tSSLTransportParameters);
+        } else {
+            log.debug("Use no SSL socket");
+            socket = new TSocket(cfg.getHost(), cfg.getPort());
+            socket.setTimeout(360);
+            socket.open();
+        }
         log.debug("GiasConnectorService.connect: socket on {}:{} opened", cfg.getHost(), cfg.getPort());
         transport = new TFramedTransport(socket);
         log.debug("GiasConnectorService.connect: Framed transport on {}:{} obtained", cfg.getHost(), cfg.getPort());
