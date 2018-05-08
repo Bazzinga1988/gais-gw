@@ -24,12 +24,15 @@ gaisclient:
     port: 19991
     login: testintegration
     password: testintegration
+    #login: agent_test
+    #password: test123
     transfer:
       job:
         interval: 30
     ssl:
         enabled: true
-        truststore: etc/jks/okp_new.jks
+        #truststore: /home/asergeev/work/glosavcluster/gais-gateway/etc/jks/okp_new.jks
+        truststore: /home/asergeev/work/glosavcluster/gais-gateway/etc/jks/era.jks
         passphrase: okp_pass
     ts:
         color: #00ffff

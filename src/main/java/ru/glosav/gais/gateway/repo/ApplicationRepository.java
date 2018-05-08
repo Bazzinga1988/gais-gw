@@ -1,4 +1,4 @@
-package ru.glosav.gais.gateway.repositories;
+package ru.glosav.gais.gateway.repo;
 
 import org.springframework.data.repository.CrudRepository;
 import ru.glosav.gais.gateway.dto.Application;

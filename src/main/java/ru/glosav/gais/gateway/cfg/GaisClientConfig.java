@@ -1,5 +1,6 @@
-package ru.glosav.gais.gateway;
+package ru.glosav.gais.gateway.cfg;
 
+import lombok.Data;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocolFactory;
 import org.apache.thrift.transport.TSSLTransportFactory;
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@Data
 public class GaisClientConfig {
     @Value("${gaisclient.ssl.truststore}")
     private String keyStore;
@@ -31,12 +33,6 @@ public class GaisClientConfig {
         return new TBinaryProtocol.Factory();
     }
 
-    @Bean
-    TSocket tSocket(TSSLTransportFactory.TSSLTransportParameters tSSLTransportParameters) throws TTransportException {
-        TSocket socket = TSSLTransportFactory.getClientSocket(host, port, 5000, tSSLTransportParameters);
-
-        return socket;
-    }
 
     @Bean
     TSSLTransportFactory.TSSLTransportParameters tSSLTransportParameters() {

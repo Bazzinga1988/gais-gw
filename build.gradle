@@ -1,5 +1,7 @@
 // https://github.com/ExampleDriven/spring-boot-thrift-example
 
+System.properties.put("spring.config.location", "etc/application.yml")
+
 buildscript {
 	ext {
 		//springBootVersion = '2.1.0.BUILD-SNAPSHOT'
@@ -111,11 +113,6 @@ compileThrift {
     generator 'java', 'private-members'
 }
 
-test {
-    outputs.dir snippetsDir
-}
-
-
 asciidoctor {
     dependsOn test
     backends = ['html5']
@@ -184,11 +181,11 @@ uploadArchives {
                 return true
             }
             repository(
-                    url: "${nexusUrl}/content/repositories/glosav-release") {
+                    url: "${nexusUrl}/content/repo/glosav-release") {
                 authentication(userName: nexusUsername, password: nexusPassword)
             }
             snapshotRepository(
-                    url: "${nexusUrl}/content/repositories/glosav-snapshot") {
+                    url: "${nexusUrl}/content/repo/glosav-snapshot") {
                 authentication(userName: nexusUsername, password: nexusPassword)
             }
         }

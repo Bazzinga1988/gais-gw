@@ -27,6 +27,7 @@ public class TransportUnit {
     @JsonIgnore
     private String sessionId;
     @NotNull
+    @Column(unique = true)
     @ApiModelProperty(value = "Государственный регистрационный знак")
     private String grn;
     @NotNull
@@ -41,6 +42,9 @@ public class TransportUnit {
     @NotNull
     @ApiModelProperty(value = "Реестровый номер категорированного транспортного средства")
     private String rnumber;
+    @NotNull
+    @ApiModelProperty(value = "Категоририя транспортного средства")
+    private String category;
     @NotNull
     @ApiModelProperty(value = "Идентификационный номер (IMEI) и модель АСН")
     private String imei;
