@@ -12,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.glosav.gais.gateway.dto.Application;
-import ru.glosav.gais.gateway.dto.Company;
 import ru.glosav.gais.gateway.dto.Session;
 import ru.glosav.gais.gateway.repo.ApplicationRepository;
 import ru.glosav.gais.gateway.repo.SessionRepository;
@@ -53,15 +52,13 @@ public class ApplicationController {
         return ResponseEntity.ok(session);
     }
 
-    @ApiOperation(value = "Тестовый метод")
-    @GetMapping(value = { "/test"},
+    @ApiOperation(value = "Список заявок")
+    @GetMapping(value = {"/list"},
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<?> test() throws ApplicationException {
-        log.debug("ApplicationController.test:");
-        Application application = new Application();
-        Company c = new Company();
-        c.setBik("432543");
-        return ResponseEntity.ok(application);
+    public ResponseEntity<?> list() throws ApplicationException {
+        log.debug("ApplicationController.list:");
+        Iterable<Application> apps = applicationRepository.findAll();
+        return ResponseEntity.ok(apps);
     }
 
 }
