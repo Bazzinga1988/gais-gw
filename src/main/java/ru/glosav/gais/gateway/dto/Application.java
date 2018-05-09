@@ -2,15 +2,18 @@ package ru.glosav.gais.gateway.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import dispatch.server.thrift.backend.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
+import ru.glosav.gais.gateway.util.DateUtil;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 @Data
@@ -43,4 +46,98 @@ public class Application {
     @NotNull
     @ManyToOne(cascade = {CascadeType.PERSIST})
     private Company company;
+
+    public static Group toTrift(
+            DispatchBackend.Client client,
+            dispatch.server.thrift.backend.Session s,
+            String groupName,
+            Application a) throws Exception {
+
+        List<Group> groups = client.getRootGroups(s);
+
+        final Group[] russianCarrierGroup = new Group[1];
+
+        groups.stream().forEach(group -> {
+            if (group.getTitle().equals(groupName))
+                russianCarrierGroup[0] = group;
+        });
+
+/*
+
+
+        if (russianCarrierGroup == null) {
+
+            List<Group> childGroups = client.getChildrenGroups(
+                    s,
+                    primaryGroup.getId(),
+                    true
+            );
+
+            for (Group g : childGroups) {
+                if (g.title.equals(m_groupname)) {
+                    russianCarrierGroup = g;
+                    break;
+                }
+            }
+        }
+*/
+        /////////////////////// Создаем компанию //////////////////////
+
+        List<StoreFieldValue> extraFields = new ArrayList<StoreFieldValue>();
+        // обращаю внимание на то, что значения Title должны добуквенно
+        // соответствовать указанным, а в значения Value подставляться
+        // актуальные данные. Наименование организации в extraFields
+        // НЕ указывается
+        extraFields.add(new StoreFieldValue()
+                .setTitle("№ Договора")
+                .setValue(a.getBaseNumber())); // "44567789900"
+        extraFields.add(new StoreFieldValue()
+                .setTitle("Дата Договора")
+                .setValue(
+                        DateUtil.parse(a.getAppDate()) // "01-01-2018"
+                ));
+        extraFields.add(new StoreFieldValue()
+                .setTitle("ИНН")
+                .setValue(a.getCompany().getInn())); // "155115802"
+        extraFields.add(new StoreFieldValue()
+                .setTitle("КПП")
+                .setValue(a.getCompany().getKpp())); // "123423"
+        extraFields.add(new StoreFieldValue()
+                .setTitle("Адрес организации")
+                .setValue(a.getCompany().getPaddress())); // "Ленинградское шоссе 80 к 16"
+        extraFields.add(new StoreFieldValue()
+                .setTitle("E-mail")
+                .setValue(a.getCompany().getEmail())); // "eprosso@navitel.su"
+        extraFields.add(new StoreFieldValue()
+                .setTitle("Телефон")
+                .setValue(a.getCompany().getPhone())); // "22233222"
+        extraFields.add(new StoreFieldValue()
+                .setTitle("Идентификатор ЕГИС ОТБ")
+                .setValue(a.getCompany().getEgisOtbId())); // "ОТБ-1-2"
+
+        License license = new License();
+        // Время истечения лицензии в формате Unix timestamp,
+        // 1546214400 соответствует 31.12.2018.
+        // Можно не указывать для бесконечных лицензий
+        if (a.getCompany().getExpireLicense() != null)
+            license.setExpire(a.getCompany().getExpireLicense().getTime() / 1000);
+        // Максимальное количество ОМ у перевозчика.
+        // Можно не указывать, если не лимитировано особо
+        // license.setMonitoringObjectsLimit(100);
+        // Максимальное количество пользователей.
+        // Для пользователей СИР число всегда равно 1
+        license.setUsersLimit(1);
+        // создаваемая компания находится во включенном состоянии
+        license.setEnabled(true);
+
+        // создается компания-перевозчик с подготовленными параметрами:
+        Group group
+                = client.createCompanyWithAdditionalFields(s, russianCarrierGroup[0].getId(),
+                a.getCompany().getName(), // "ООО Адам Козлевич"
+                license,
+                new AdditionalFields(extraFields)
+        );
+        return group;
+    }
+
 }
