@@ -1,6 +1,5 @@
 package ru.glosav.gais.gateway.jobs;
 
-import org.apache.thrift.transport.TTransportException;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -21,10 +20,10 @@ public class GaisTransferJob implements Job {
     private ApplicationContext ctx;
 
     @Autowired
-    SessionRepository sessionRepository;
+    private SessionRepository sessionRepository;
 
     @Autowired
-    ApplicationRepository applicationRepository;
+    private ApplicationRepository applicationRepository;
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -52,8 +51,8 @@ public class GaisTransferJob implements Job {
         } catch (Exception e) {
             log.warn("Error {}",e);
         } finally {
-
+            gcs.disconnect();
         }
-        gcs.disconnect();
+
     }
 }

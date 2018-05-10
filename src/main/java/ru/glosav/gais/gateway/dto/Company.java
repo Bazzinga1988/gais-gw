@@ -9,10 +9,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.time.Instant;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 @Data
 @Entity
@@ -62,7 +60,6 @@ public class Company {
     @NotNull
     @ApiModelProperty(value = "Идентификатор ЕГИС ОТБ")
     private String egisOtbId;
-    @NotNull
     @ApiModelProperty(value = "Время окончания лицензии, формат dd.MM.yyyy", example = "25.04.2019")
     @DateTimeFormat(pattern="dd.MM.yyyy", iso = DateTimeFormat.ISO.DATE)
     @JsonFormat(pattern="dd.MM.yyyy", shape = JsonFormat.Shape.STRING)

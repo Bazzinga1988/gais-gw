@@ -4,7 +4,10 @@ import dispatch.server.thrift.backend.DispatchBackend;
 import dispatch.server.thrift.backend.Session;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
-import org.apache.thrift.transport.*;
+import org.apache.thrift.transport.TFramedTransport;
+import org.apache.thrift.transport.TSSLTransportFactory;
+import org.apache.thrift.transport.TSocket;
+import org.apache.thrift.transport.TTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,13 +46,19 @@ public class GaisConnectorService {
 
     @PreDestroy
     public void destroy() {
+
         log.debug("GiasConnectorService.destroy");
     }
+
     public void connect() throws TException {
         log.debug("GiasConnectorService.connect");
         if(cfg.isSslEnabled()) {
             log.debug("Use SSL socket");
-            socket = TSSLTransportFactory.getClientSocket(cfg.getHost(), cfg.getPort(), 5000, tSSLTransportParameters);
+            socket = TSSLTransportFactory.getClientSocket(
+                    cfg.getHost(),
+                    cfg.getPort(),
+                    5000,
+                    tSSLTransportParameters);
         } else {
             log.debug("Use no SSL socket");
             socket = new TSocket(cfg.getHost(), cfg.getPort());
@@ -80,4 +89,5 @@ public class GaisConnectorService {
         }
 
     }
+
 }

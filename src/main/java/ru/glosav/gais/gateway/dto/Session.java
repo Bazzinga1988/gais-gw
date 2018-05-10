@@ -1,12 +1,16 @@
 package ru.glosav.gais.gateway.dto;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.UUID;
 
+@Data
 @Entity
 public class Session {
     @Id
@@ -27,51 +31,13 @@ public class Session {
     @Column
     @ApiModelProperty(value = "Дата и время успешной отправки в ГАИС")
     private Instant handledDate;
+    @Column
+    @ApiModelProperty(value = "Количество попыток отправки в ГАИС")
+    private int attempts;
 
     public Session() {
         this.id = UUID.randomUUID().toString();
         this.created = Instant.now();
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public Instant getCreated() {
-        return created;
-    }
-
-    public long getAppId() {
-        return appId;
-    }
-
-    public void setAppId(long appId) {
-        this.appId = appId;
-    }
-
-    public boolean isHandled() {
-        return handled;
-    }
-
-    public void setHandled(boolean handled) {
-        this.handled = handled;
-    }
-
-    public Instant getHandledDate() {
-        return handledDate;
-    }
-
-    public void setHandledDate(Instant handledDate) {
-        this.handledDate = handledDate;
-    }
-
-    @Override
-    public String toString() {
-        return "Session{" +
-                "id='" + id + '\'' +
-                ", created=" + created +
-                ", appId=" + appId +
-                ", handled=" + handled +
-                '}';
-    }
 }
