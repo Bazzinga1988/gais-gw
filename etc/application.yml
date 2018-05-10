@@ -20,7 +20,8 @@ spring:
 
 gaisclient:
     group: "Тест Российские перевозчики"
-    host: 10.77.205.98
+    #host: 10.77.205.98 # internal via Glosav - Glonass VipNet
+    host: 193.232.47.4  # external public Glonass
     port: 19991
     login: testintegration
     password: testintegration
@@ -28,11 +29,12 @@ gaisclient:
     #password: test123
     transfer:
       job:
-        interval: 30
+        interval: 10
     ssl:
         enabled: true
-        truststore: /home/asergeev/work/glosavcluster/gais-gateway/etc/jks/okp_new.jks
+        #truststore: /home/asergeev/work/glosavcluster/gais-gateway/etc/jks/okp_new.jks
         #truststore: /home/asergeev/work/glosavcluster/gais-gateway/etc/jks/era.jks
+        truststore: /home/asergeev/work/glosavcluster/gais-gateway/etc/jks/era_new.jks
         passphrase: okp_pass
     ts:
         color: #00ffff

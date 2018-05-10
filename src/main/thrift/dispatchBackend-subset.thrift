@@ -155,6 +155,27 @@ service DispatchBackend {
 		5:AccessDenied ad,
 	),
 
+        /*
+         * returns children groups list info by parent group id
+         *
+         * @param session - user session
+         * @param parentGroupId - parent group id, not empty, uuid
+         * @param recursive - return all subgroups
+         *
+         */
+        list<Group> getChildrenGroups(
+                1:Session session,
+                2:string parentGroupId,
+                3:bool recursive,
+        ) throws (
+                1:BadRequest bre,
+                2:Busy bse,
+                3:InternalServerError ise,
+                4:Unauthorized ue,
+                5:AccessDenied ad,
+                6:ObjectNotFound one,
+        ),
+
 	/*
 	 * returns new group info
 	 *

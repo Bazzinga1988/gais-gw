@@ -1,6 +1,7 @@
 package ru.glosav.gais.gateway.svc;
 
 import dispatch.server.thrift.backend.DispatchBackend;
+import dispatch.server.thrift.backend.Group;
 import dispatch.server.thrift.backend.Session;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -17,6 +18,7 @@ import ru.glosav.gais.gateway.dto.Application;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.List;
 
 @Component
 public class GaisConnectorService {
@@ -36,22 +38,29 @@ public class GaisConnectorService {
 
     @PostConstruct
     public void init() {
-        log.debug("GiasConnectorService.init");
+        log.debug("GaisConnectorService.init");
     }
 
-    public void send(Application application) {
-        log.debug("GiasConnectorService.send: {}, TSocket: {}", application, socket == null ? "null" : socket.toString());
+    public void send(Application application) throws TException {
+        log.debug("GaisConnectorService.send: application id: {}", application.getId());
+        ///////////// Находим группу m_groupname /////////////
+        List<Group> groups = client.getRootGroups(session);
+        groups.stream().forEach(group -> log.debug("Group: {}",group));
 
+        Group primaryGroup = groups.get(0);
+        Group russianCarrierGroup = primaryGroup.getTitle().equals(cfg.getGroup()) ?
+                primaryGroup : null;
+        log.debug("russianCarrierGroup found: id: {}, title: {}", russianCarrierGroup.getId(), russianCarrierGroup.getTitle());
     }
 
     @PreDestroy
     public void destroy() {
 
-        log.debug("GiasConnectorService.destroy");
+        log.debug("GaisConnectorService.destroy");
     }
 
     public void connect() throws TException {
-        log.debug("GiasConnectorService.connect");
+        log.debug("GaisConnectorService.connect");
         if(cfg.isSslEnabled()) {
             log.debug("Use SSL socket");
             socket = TSSLTransportFactory.getClientSocket(
@@ -65,18 +74,18 @@ public class GaisConnectorService {
             socket.setTimeout(360);
             socket.open();
         }
-        log.debug("GiasConnectorService.connect: socket on {}:{} opened", cfg.getHost(), cfg.getPort());
+        log.debug("GaisConnectorService.connect: socket on {}:{} opened", cfg.getHost(), cfg.getPort());
         transport = new TFramedTransport(socket);
-        log.debug("GiasConnectorService.connect: Framed transport on {}:{} obtained", cfg.getHost(), cfg.getPort());
+        log.debug("GaisConnectorService.connect: Framed transport on {}:{} obtained", cfg.getHost(), cfg.getPort());
         protocol = new TBinaryProtocol(transport, true, true);
-        log.debug("GiasConnectorService.connect: Binary protocol on {}:{} obtained", cfg.getHost(), cfg.getPort());
+        log.debug("GaisConnectorService.connect: Binary protocol on {}:{} obtained", cfg.getHost(), cfg.getPort());
         client = new DispatchBackend.Client.Factory().getClient(protocol);
-        log.debug("GiasConnectorService.connect: Dispatch backend client on {}:{} up", cfg.getHost(), cfg.getPort());
+        log.debug("GaisConnectorService.connect: Dispatch backend client on {}:{} up", cfg.getHost(), cfg.getPort());
         session = client.login(cfg.getLogin(), cfg.getPassword(), false);
     }
 
     public void disconnect() {
-        log.debug("GiasConnectorService.disconnect");
+        log.debug("GaisConnectorService.disconnect");
 
         try {
             client.logout(session);

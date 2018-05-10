@@ -15,6 +15,7 @@ import ru.glosav.gais.gateway.repo.ApplicationRepository;
 import ru.glosav.gais.gateway.repo.SessionRepository;
 
 import javax.ws.rs.core.GenericEntity;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -41,10 +42,10 @@ public class SessionController {
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<?> list() throws ApplicationException {
         log.debug("SessionController.list:");
-        Iterable<Session> sessions = sessionRepository.findAll();
-
-        GenericEntity<List<Session>> entities =
-                new GenericEntity<>(toList(sessions));
-        return ResponseEntity.ok(entities);
+        List<Session> target = new ArrayList<>();
+        sessionRepository.findAll().forEach(target::add);
+        return ResponseEntity.ok(target);
     }
+
+
 }

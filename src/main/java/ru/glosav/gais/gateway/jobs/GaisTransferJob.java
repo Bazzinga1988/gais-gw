@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+import ru.glosav.gais.gateway.dto.Application;
 import ru.glosav.gais.gateway.repo.ApplicationRepository;
 import ru.glosav.gais.gateway.repo.SessionRepository;
 import ru.glosav.gais.gateway.svc.GaisConnectorService;
@@ -36,13 +37,17 @@ public class GaisTransferJob implements Job {
                     session -> {
                         log.debug("Handle session  with id: {}", session.getId());
                         try {
-                            applicationRepository.findById(
-                                    session.getAppId()
-                            ).ifPresent(
-                                    application -> {
+                            Application application = applicationRepository.findBySessionId(
+                                    session.getId()
+                            );
+                            if(application != null){
                                         log.debug("Handle application with id: {}", application.getId());
-                                        gcs.send(application);
-                                    });
+                                        try {
+                                            gcs.send(application);
+                                        } catch (Exception e) {
+                                            log.warn("Error send application with id: {}", application.getId());
+                                        }
+                                    }
                         } catch (Exception e) {
                             log.warn("Error {}",e);
                         }

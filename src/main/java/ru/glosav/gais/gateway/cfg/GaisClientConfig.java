@@ -6,13 +6,18 @@ import org.apache.thrift.protocol.TProtocolFactory;
 import org.apache.thrift.transport.TSSLTransportFactory;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransportException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import ru.glosav.gais.gateway.ctrl.ApplicationController;
 
 @Configuration
 @Data
 public class GaisClientConfig {
+    Logger log = LoggerFactory.getLogger(GaisClientConfig.class);
+
     @Value("${gaisclient.ssl.enabled}")
     private boolean sslEnabled;
     @Value("${gaisclient.ssl.truststore}")
@@ -40,7 +45,8 @@ public class GaisClientConfig {
     TSSLTransportFactory.TSSLTransportParameters tSSLTransportParameters() {
         TSSLTransportFactory.TSSLTransportParameters param =
                 new TSSLTransportFactory.TSSLTransportParameters();
-        param.setKeyStore(keyStore, passphrase);
+        log.debug("Keystore: {}, passphrase: ", keyStore, passphrase);
+        param.setTrustStore(keyStore, passphrase);
         return param;
     }
 }

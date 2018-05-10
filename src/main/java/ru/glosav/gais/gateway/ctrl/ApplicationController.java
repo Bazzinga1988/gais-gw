@@ -17,6 +17,8 @@ import ru.glosav.gais.gateway.repo.ApplicationRepository;
 import ru.glosav.gais.gateway.repo.SessionRepository;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/application")
@@ -39,7 +41,7 @@ public class ApplicationController {
     public ResponseEntity<Session> register(
             @ApiParam(value = "Объект заявки", required = true)
             @NotNull
-            @RequestBody Application application) throws ApplicationException {
+            @RequestBody Application application) {
         log.debug("ApplicationController.register: {}", application);
         Session session = new Session();
         application.setSessionId(session.getId());
@@ -55,10 +57,11 @@ public class ApplicationController {
     @ApiOperation(value = "Список заявок")
     @GetMapping(value = {"/list"},
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<?> list() throws ApplicationException {
+    public ResponseEntity<?> list() {
         log.debug("ApplicationController.list:");
-        Iterable<Application> apps = applicationRepository.findAll();
-        return ResponseEntity.ok(apps);
+        List<Application> target = new ArrayList<>();
+        applicationRepository.findAll().forEach(target::add);
+        return ResponseEntity.ok(target);
     }
 
 }
