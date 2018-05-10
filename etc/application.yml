@@ -20,8 +20,8 @@ spring:
 
 gaisclient:
     group: "Тест Российские перевозчики"
-    #host: 10.77.205.98 # internal via Glosav - Glonass VipNet
-    host: 193.232.47.4  # external public Glonass
+    host: 10.77.205.98 # internal via Glosav - Glonass VipNet
+    #host: 193.232.47.4  # external public Glonass
     port: 19991
     login: testintegration
     password: testintegration

@@ -43,7 +43,7 @@ public class TransportUnit {
     @ApiModelProperty(value = "Реестровый номер категорированного транспортного средства")
     private String rnumber;
     @NotNull
-    @ApiModelProperty(value = "Категоририя транспортного средства")
+    @ApiModelProperty(value = "Категория транспортного средства")
     private String category;
     @NotNull
     @ApiModelProperty(value = "Идентификационный номер (IMEI) и модель АСН")

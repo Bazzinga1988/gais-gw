@@ -64,10 +64,8 @@ public class GaisConnectorService {
         if(cfg.isSslEnabled()) {
             log.debug("Use SSL socket");
             socket = TSSLTransportFactory.getClientSocket(
-                    cfg.getHost(),
-                    cfg.getPort(),
-                    5000,
-                    tSSLTransportParameters);
+                    cfg.getHost(), cfg.getPort(),
+                    5000, tSSLTransportParameters);
         } else {
             log.debug("Use no SSL socket");
             socket = new TSocket(cfg.getHost(), cfg.getPort());
