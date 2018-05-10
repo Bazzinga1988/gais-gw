@@ -31,8 +31,8 @@ gaisclient:
         interval: 30
     ssl:
         enabled: true
-        #truststore: /home/asergeev/work/glosavcluster/gais-gateway/etc/jks/okp_new.jks
-        truststore: /home/asergeev/work/glosavcluster/gais-gateway/etc/jks/era.jks
+        truststore: /home/asergeev/work/glosavcluster/gais-gateway/etc/jks/okp_new.jks
+        #truststore: /home/asergeev/work/glosavcluster/gais-gateway/etc/jks/era.jks
         passphrase: okp_pass
     ts:
         color: #00ffff
