@@ -20,7 +20,9 @@ spring:
 
 gaisclient:
     group: "Тест Российские перевозчики"
-    host: 10.77.205.98
+
+    #host: 10.77.205.98
+    host:  193.232.47.4
     port: 19991
     login: testintegration
     password: testintegration

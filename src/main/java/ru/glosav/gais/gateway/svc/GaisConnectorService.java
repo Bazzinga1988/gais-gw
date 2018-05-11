@@ -224,6 +224,7 @@ public class GaisConnectorService {
         log.debug("GaisConnectorService.createTransportUnits");
                 Hibernate.initialize(c.getUnits());
                 c.getUnits().stream().forEach(tu -> {
+                    log.debug("Try save TU: {}", tu.getGrn());
                     List<StoreFieldValue> extraFieldsOM = new ArrayList<StoreFieldValue>();
                     // обращаю внимание на то, что значения Title должны добуквенно
                     // соответствовать указанным, а в значения Value подставляться

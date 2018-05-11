@@ -54,6 +54,7 @@ public class GaisTransferJob implements Job {
                                         session.setAttempts( session.getAttempts() + 1 );
                                         session.setHandledDate(Instant.now());
                                         sessionRepository.save(session);
+
                                     } catch (Exception e) {
                                         log.warn("Error send application with id: {}", application.getId(), e);
                                     }

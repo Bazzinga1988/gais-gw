@@ -9,7 +9,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -66,9 +65,8 @@ public class Company {
     @JsonFormat(pattern="dd.MM.yyyy", shape = JsonFormat.Shape.STRING)
     private Date expireLicense;
     @NotNull
-    @OneToMany(fetch=FetchType.EAGER, mappedBy = "company", cascade = {CascadeType.PERSIST}, orphanRemoval = true)
-    // @JoinColumn(name = "company_id")
+    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL}, orphanRemoval = true)
     @ApiModelProperty(value = "Список регистрируемых транспортных средств компании")
-    private List<TransportUnit> units = new ArrayList<>();
+    private List<TransportUnit> units;
 
 }

@@ -20,8 +20,9 @@ public class TransportUnit {
     private long id;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id")
+    //@ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "COMPANY_ID", referencedColumnName = "ID")
     private Company company;
 
     @JsonIgnore

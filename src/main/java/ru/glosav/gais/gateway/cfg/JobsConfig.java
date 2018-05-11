@@ -1,4 +1,4 @@
-package ru.glosav.gais.gateway.jobs;
+package ru.glosav.gais.gateway.cfg;
 
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
@@ -7,6 +7,7 @@ import org.quartz.TriggerBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import ru.glosav.gais.gateway.jobs.GaisTransferJob;
 
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 
