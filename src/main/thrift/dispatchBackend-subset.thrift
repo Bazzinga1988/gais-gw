@@ -266,5 +266,26 @@ service DispatchBackend {
 		5:AccessDenied ade,
 		6:ObjectNotFound one,
 	)
+
+    /*  Метод getChildrenMonitoringObjects – возвращает список объектов мониторинга для родительской группы
+     *   Входные параметры:
+     * @param session – сессия пользователя
+     * @param parentGroupId – id родительской группы
+     * @param recursive - return all objects from subgroups
+     */
+
+     list<MonitoringObject> getChildrenMonitoringObjects(
+               1:Session session,
+               2:string parentGroupId,
+               3:bool recursive,
+
+     ) throws (
+               1:BadRequest bre,
+               2:Busy bse,
+               3:InternalServerError ise,
+               4:Unauthorized ue,
+               5:AccessDenied ad,
+               6:ObjectNotFound one,
+     )
 }
 

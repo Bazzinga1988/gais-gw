@@ -29,7 +29,7 @@ public class Application {
     private String sessionId;
     @NotNull
     @Column(unique = true)
-    @ApiModelProperty(value = "Номер заявки", example = "25042018")
+    @ApiModelProperty(value = "Номер заявки", example = "44567789900")
     private String number;
     @NotNull
     @ApiModelProperty(value = "Дата заявки, формат dd.MM.yyyy", example = "25.04.2018")

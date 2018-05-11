@@ -28,31 +28,31 @@ public class TransportUnit {
     private String sessionId;
     @NotNull
     @Column(unique = true)
-    @ApiModelProperty(value = "Государственный регистрационный знак")
+    @ApiModelProperty(value = "Государственный регистрационный знак", example = "A-1234-дам")
     private String grn;
     @NotNull
-    @ApiModelProperty(value = "Марка транспортного средства")
+    @ApiModelProperty(value = "Марка транспортного средства", example = "Lorraine Dietrich")
     private String type; // марка
     @NotNull
-    @ApiModelProperty(value = "Модель транспортного средства")
+    @ApiModelProperty(value = "Модель транспортного средства", example = "Антилопа Гну")
     private String model;
     @NotNull
-    @ApiModelProperty(value = "VIN транспортного средства")
+    @ApiModelProperty(value = "VIN транспортного средства", example = "00011122233")
     private String vin;
     @NotNull
-    @ApiModelProperty(value = "Реестровый номер категорированного транспортного средства")
+    @ApiModelProperty(value = "Реестровый номер категорированного транспортного средства", example = "22233222")
     private String rnumber;
     @NotNull
-    @ApiModelProperty(value = "Категория транспортного средства")
+    @ApiModelProperty(value = "Категория транспортного средства", example = "Первая")
     private String category;
     @NotNull
-    @ApiModelProperty(value = "Идентификационный номер (IMEI) и модель АСН")
+    @ApiModelProperty(value = "Идентификационный номер (IMEI) и модель АСН", example = "")
     private String imei;
     @NotNull
-    @ApiModelProperty(value = "ICCID USIM-карты")
+    @ApiModelProperty(value = "ICCID USIM-карты", example = "+79162223222")
     private String iccid;
     @NotNull
-    @ApiModelProperty(value = "Абонентский номер USIM-карты")
+    @ApiModelProperty(value = "Абонентский номер USIM-карты", example = "")
     private String msisdn;
 
 }
