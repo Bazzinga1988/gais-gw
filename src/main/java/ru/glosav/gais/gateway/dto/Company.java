@@ -14,6 +14,9 @@ import java.util.List;
 
 @Data
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"inn", "kpp"})
+})
 @ApiModel(value="Company", description="Модель данных описывающая компанию")
 public class Company {
     @Id

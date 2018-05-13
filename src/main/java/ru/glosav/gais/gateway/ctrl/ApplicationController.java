@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +19,6 @@ import ru.glosav.gais.gateway.repo.SessionRepository;
 import ru.glosav.gais.gateway.svc.GaisConnectorService;
 
 import javax.validation.constraints.NotNull;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,9 +43,7 @@ public class ApplicationController {
     @ApiOperation(value = "Сервис регистрации заявки в ГАИС")
     @PostMapping(value = { "/register"},
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseStatus(value=HttpStatus.CONFLICT,
-            reason="Data integrity violation")  // 409
-    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Session> register(
             @ApiParam(value = "Объект заявки", required = true)
             @NotNull
@@ -55,18 +51,16 @@ public class ApplicationController {
         log.debug("ApplicationController.register: {}", application);
         Session session = new Session();
         application.setSessionId(session.getId());
-        try {
-            sessionRepository.save(session);
-            applicationRepository.save(application);
-        } catch (Exception e) {
-            log.warn("Error persist application: {}", e.getMessage());
-        }
-        return ResponseEntity.ok(session);
+        sessionRepository.save(session);
+        Application app = applicationRepository.save(application);
+        session.setAppId(app.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(session);
     }
 
     @ApiOperation(value = "Список заявок")
     @GetMapping(value = {"/list"},
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseStatus(HttpStatus.FOUND)
     public ResponseEntity<?> list() {
         log.debug("ApplicationController.list:");
         List<Application> target = new ArrayList<>();
@@ -77,6 +71,7 @@ public class ApplicationController {
     @ApiOperation(value = "Список заявок в глонас")
     @GetMapping(value = {"/rlist"},
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseStatus(HttpStatus.FOUND)
     public ResponseEntity<?> rlist() {
         log.debug("ApplicationController.rlist:");
         List<Application> target = new ArrayList<>();
