@@ -39,7 +39,7 @@ logger("org.springframework.boot", OFF)
 logger("org.springframework.boot.autoconfigure", OFF)
 
 logger("ru.glosav.gais.gateway", DEBUG)
-logger("org.springframework.web", DEBUG)
+logger("org.springframework.web", INFO)
 
 root(INFO, ["STDOUT"])
-root(DEBUG, ["FILE"])
+root(INFO, ["FILE"])

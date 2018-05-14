@@ -14,9 +14,11 @@ import java.util.List;
 
 @Data
 @Entity
+/*
 @Table(uniqueConstraints = {
         @UniqueConstraint(columnNames = {"inn", "kpp"})
 })
+*/
 @ApiModel(value="Company", description="Модель данных описывающая компанию")
 public class Company {
     @Id
@@ -30,7 +32,6 @@ public class Company {
     @Column(unique = true)
     @ApiModelProperty(value = "ИНН компании", example = "155115802")
     private String inn;
-    @NotNull
     @ApiModelProperty(value = "КПП компании", example = "123423")
     private String kpp;
     @NotNull
@@ -39,7 +40,6 @@ public class Company {
     @NotNull
     @ApiModelProperty(value = "Физический адрес компании", example = "Ленинградское шоссе 80 к 16")
     private String paddress;
-    @NotNull
     @ApiModelProperty(value = "Юридический адрес компании", example = "Ленинградское шоссе 80 к 12")
     private String laddress;
     @NotNull

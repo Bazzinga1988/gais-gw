@@ -37,6 +37,10 @@ version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+
+def slf4jVersion = "1.7.25"
+def logbackVersion = "1.2.3"
+
 bootJar {
     launchScript() {
         properties 'initInfoProvides': rootProject.name
@@ -71,6 +75,14 @@ dependencies {
     compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.8.0'
     compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.8.0'
 
+    compile "org.slf4j:log4j-over-slf4j:${slf4jVersion}"
+    compile "org.slf4j:jul-to-slf4j:${slf4jVersion}"
+    compile "org.slf4j:jcl-over-slf4j:${slf4jVersion}"
+    compile "ch.qos.logback:logback-classic:${logbackVersion}"
+
+    // Groovy dependencies
+    compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.13'
+
 	compileOnly('org.springframework.boot:spring-boot-configuration-processor')
     compileOnly('org.projectlombok:lombok:1.16.20')
 
@@ -79,6 +91,7 @@ dependencies {
 
     asciidoctor group: 'org.springframework.restdocs', name: 'spring-restdocs-asciidoctor', version: "${springBootVersion}"
     testCompile group: 'org.springframework.restdocs', name: 'spring-restdocs-mockmvc'
+
 
 }
 
