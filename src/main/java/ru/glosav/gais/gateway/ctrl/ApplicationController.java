@@ -81,10 +81,14 @@ public class ApplicationController {
             gcs.connect();
             gcs.list();
         } catch (Exception e) {
-            log.warn("Error {}",e);
-        } finally {
-            gcs.disconnect();
+            log.error("Error in rlist", e);
         }
+
+         try {
+             gcs.disconnect();
+         } catch (Exception e) {
+
+         }
         return ResponseEntity.ok("Ok");
     }
 

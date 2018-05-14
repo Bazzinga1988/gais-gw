@@ -57,6 +57,7 @@ public class GaisConnectorService {
     private Counter unitErrorCounter = null;
 
     private Timer sendTimer = null;
+    private Timer listCompaniesTimer = null;
 
 
     @PostConstruct
@@ -67,6 +68,7 @@ public class GaisConnectorService {
         unitSuccessCounter = metricRegistry.counter("SEND_UNIT_SUCCESS_COUNTER");
         unitErrorCounter = metricRegistry.counter("SEND_UNIT_ERROR_COUNTER");
         sendTimer = metricRegistry.timer("GaisConnectorService::send");
+        listCompaniesTimer = metricRegistry.timer("GaisConnectorService::listCompanies");
     }
 
 
@@ -78,7 +80,7 @@ public class GaisConnectorService {
 
     public void connect() throws TException {
         log.debug("GaisConnectorService.connect");
-        if(cfg.isSslEnabled()) {
+        if (cfg.isSslEnabled()) {
             log.debug("Use SSL socket");
             socket = TSSLTransportFactory.getClientSocket(
                     cfg.getHost(), cfg.getPort(),
@@ -101,25 +103,26 @@ public class GaisConnectorService {
 
     public void disconnect() {
         log.debug("GaisConnectorService.disconnect");
-
-        try {
-            client.logout(session);
-            if (socket != null && socket.isOpen()) {
-                socket.close();
+        synchronized (client) {
+            try {
+                client.logout(session);
+                if (socket != null && socket.isOpen()) {
+                    socket.close();
+                }
+                log.debug("GiasConnectorService.disconnect: socket on {}:{} closed", cfg.getHost(), cfg.getPort());
+            } catch (Exception e) {
+                log.warn("Incorrect close TSocket on {}:{}, {}", cfg.getHost(), cfg.getPort(), e);
             }
-            log.debug("GiasConnectorService.disconnect: socket on {}:{} closed", cfg.getHost(), cfg.getPort());
-        } catch (Exception e) {
-            log.warn("Incorrect close TSocket on {}:{}, {}", cfg.getHost(), cfg.getPort(), e);
         }
-
     }
 
     public void list() throws Exception {
         log.debug("GaisConnectorService.list");
+        final Timer.Context context = listCompaniesTimer.time();
         synchronized (client) {
             List<Group> groups = client.getRootGroups(session);
             groups.forEach(group -> {
-                log.debug("Group[ id: {}, title: '{}'", group.getId(), group.getTitle());
+                log.debug("Group[ id: {}, title: '{}']", group.getId(), group.getTitle());
 /*
                 group.getAdditionalFields().getDataIterator().forEachRemaining(storeFieldValue -> {
                     log.debug(" >>> storeFieldValue: '{}'", storeFieldValue.getTitle());
@@ -127,29 +130,29 @@ public class GaisConnectorService {
 */
                 try {
                     List<Group> companyList = client.getChildrenGroups(session, group.getId(), false);
-                    companyList.stream().forEach(company -> {
-                        log.debug("Company: {}, {}, {}: {}",
-                                company.getId(),
-                                company.getTitle(),
-                                company.getAdditionalFields().getData().get(3).getTitle(), // 3 - address
-                                company.getAdditionalFields().getData().get(3).getValue());
+                    for(Group company: companyList) {
+                        log.debug("Company: [{}, {}]", company.getId(), company.getTitle());
+/*
                         try {
                             List<MonitoringObject> monitoringObjects =
                                     client.getChildrenMonitoringObjects(session, company.getId(), false);
-                            monitoringObjects.stream().forEach(mo->{
-                                log.debug("--------> MO: {}", mo.getName());
-                            });
+                            for (MonitoringObject mo : monitoringObjects) {
+                                log.debug("--------> MO: [{}, {}]", mo.getName(), mo.getTracker().getIdentifier());
+                            }
                         } catch (TException e) {
-                            e.printStackTrace();
+                            log.error("Error obtain monitoring object", e);
                         }
+*/
 
-                    });
 
+
+                    }
                 } catch (TException e) {
-                    e.printStackTrace();
+                    log.error("Error obtain company", e);
                 }
             });
         }
+        context.stop();
     }
 
     public void save(String groupName, Application a) throws Exception {
@@ -242,70 +245,70 @@ public class GaisConnectorService {
 
     private void createTransportUnits(String sessionId, Company c, Group g) {
         log.debug("GaisConnectorService.createTransportUnits");
-                Hibernate.initialize(c.getUnits());
-                c.getUnits().stream().forEach(tu -> {
-                    log.debug("Try save TU: {}", tu);
-                    tu.setSessionId(sessionId);
-                    List<StoreFieldValue> extraFieldsOM = new ArrayList<StoreFieldValue>();
-                    // обращаю внимание на то, что значения Title должны добуквенно
-                    // соответствовать указанным, а в значения Value подставляться
-                    // актуальные данные. ГРЗ и № трекера в extraFieldsOM НЕ указывается
-                    extraFieldsOM.add(new StoreFieldValue()
-                            .setTitle("Марка")
-                            .setValue(tu.getType()));
-                    extraFieldsOM.add(new StoreFieldValue()
-                            .setTitle("Модель")
-                            .setValue(tu.getModel()));
-                    extraFieldsOM.add(new StoreFieldValue()
-                            .setTitle("VIN")
-                            .setValue(tu.getVin()));
-                    extraFieldsOM.add(new StoreFieldValue()
-                            .setTitle("Реестровый номер КТС")
-                            .setValue(tu.getRnumber()));
-                    extraFieldsOM.add(new StoreFieldValue()
-                            .setTitle("Сведения о категорировании")
-                            .setValue(tu.getCategory()));
-                    extraFieldsOM.add(new StoreFieldValue()
-                            .setTitle("ICCID SIM")
-                            .setValue(tu.getIccid()));
+        Hibernate.initialize(c.getUnits());
+        c.getUnits().stream().forEach(tu -> {
+            log.debug("Try save TU: {}", tu);
+            tu.setSessionId(sessionId);
+            List<StoreFieldValue> extraFieldsOM = new ArrayList<StoreFieldValue>();
+            // обращаю внимание на то, что значения Title должны добуквенно
+            // соответствовать указанным, а в значения Value подставляться
+            // актуальные данные. ГРЗ и № трекера в extraFieldsOM НЕ указывается
+            extraFieldsOM.add(new StoreFieldValue()
+                    .setTitle("Марка")
+                    .setValue(tu.getType()));
+            extraFieldsOM.add(new StoreFieldValue()
+                    .setTitle("Модель")
+                    .setValue(tu.getModel()));
+            extraFieldsOM.add(new StoreFieldValue()
+                    .setTitle("VIN")
+                    .setValue(tu.getVin()));
+            extraFieldsOM.add(new StoreFieldValue()
+                    .setTitle("Реестровый номер КТС")
+                    .setValue(tu.getRnumber()));
+            extraFieldsOM.add(new StoreFieldValue()
+                    .setTitle("Сведения о категорировании")
+                    .setValue(tu.getCategory()));
+            extraFieldsOM.add(new StoreFieldValue()
+                    .setTitle("ICCID SIM")
+                    .setValue(tu.getIccid()));
 
-                    Tracker tracker = new Tracker();
+            Tracker tracker = new Tracker();
 
-                    tracker.setVendor("EGTS"); // или "STUB" для псевдо-трекеров на этапе
-                    // предварительной регистрации
-                    tracker.setModel("EGTS"); // или "STUB" для псевдо-трекеров на этапе
-                    // предварительной регистрации
-                    tracker.addToIdentifier(tu.getImei());
+            tracker.setVendor("EGTS"); // или "STUB" для псевдо-трекеров на этапе
+            // предварительной регистрации
+            tracker.setModel("EGTS"); // или "STUB" для псевдо-трекеров на этапе
+            // предварительной регистрации
+            tracker.addToIdentifier(tu.getImei());
 
-                    try {
-                        MonitoringObject om
-                                = client.createMonitoringObjectWithAdditionalFields(
-                                session,
-                                g.getId(),
-                                tracker,
-                                tu.getGrn(), // ГРЗ
-                                "#00ffff", // цвет отображения объекта в АСМ ЭРА, в формате RGB
-                                "7", // номер иконки объекта в АСМ ЭРА, от "0" до "15"
-                                new AdditionalFields(extraFieldsOM)
-                        );
-                        unitSuccessCounter.inc();
-                        TransferLog transferLog = new TransferLog();
-                        transferLog.setType(TransferLog.Type.TRANSPORT_UNIT);
-                        transferLog.setObjId(tu.getId());
-                        transferLog.setSessionId(sessionId);
-                        transferLog.setExtId(om.getId());
-                        try {
-                            transferLogRepository.save(transferLog);
-                        } catch (Exception e) {
-                            log.error("Error save transfer log: {}", transferLog.toString());
-                        }
-                        log.info("Create transport unit '{}' for company '{}'", om.getId(), om.getName());
-                    } catch (TException e) {
-                        unitErrorCounter.inc();
-                        log.warn("Error create transport unit '{}' for company '{}'", tu.getGrn(), c.getName(), e);
-                    }
+            try {
+                MonitoringObject om
+                        = client.createMonitoringObjectWithAdditionalFields(
+                        session,
+                        g.getId(),
+                        tracker,
+                        tu.getGrn(), // ГРЗ
+                        "#00ffff", // цвет отображения объекта в АСМ ЭРА, в формате RGB
+                        "7", // номер иконки объекта в АСМ ЭРА, от "0" до "15"
+                        new AdditionalFields(extraFieldsOM)
+                );
+                unitSuccessCounter.inc();
+                TransferLog transferLog = new TransferLog();
+                transferLog.setType(TransferLog.Type.TRANSPORT_UNIT);
+                transferLog.setObjId(tu.getId());
+                transferLog.setSessionId(sessionId);
+                transferLog.setExtId(om.getId());
+                try {
+                    transferLogRepository.save(transferLog);
+                } catch (Exception e) {
+                    log.error("Error save transfer log: {}", transferLog.toString());
+                }
+                log.info("Create transport unit '{}' for company '{}'", om.getId(), om.getName());
+            } catch (TException e) {
+                unitErrorCounter.inc();
+                log.warn("Error create transport unit '{}' for company '{}'", tu.getGrn(), c.getName(), e);
+            }
 
-                });
+        });
 
     }
 

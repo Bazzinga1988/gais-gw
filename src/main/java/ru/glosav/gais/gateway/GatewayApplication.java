@@ -37,14 +37,14 @@ public class GatewayApplication {
 	private void init() {
 		final JmxReporter reporter = JmxReporter.forRegistry(metricRegistry)
 				.convertRatesTo(TimeUnit.SECONDS)
-				.convertDurationsTo(TimeUnit.MICROSECONDS)
+				.convertDurationsTo(TimeUnit.MILLISECONDS)
 				.build();
 		reporter.start();
 
 		Slf4jReporter slf4jReporter = Slf4jReporter.forRegistry(metricRegistry)
 				.outputTo(LoggerFactory.getLogger("ru.glosav.gais.gateway"))
 				.convertRatesTo(TimeUnit.SECONDS)
-				.convertDurationsTo(TimeUnit.MICROSECONDS)
+				.convertDurationsTo(TimeUnit.MILLISECONDS)
 				.build();
 		slf4jReporter.start(60, TimeUnit.SECONDS);
 
