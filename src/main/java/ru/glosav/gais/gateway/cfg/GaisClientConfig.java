@@ -1,5 +1,6 @@
 package ru.glosav.gais.gateway.cfg;
 
+import com.codahale.metrics.MetricRegistry;
 import lombok.Data;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocolFactory;
@@ -34,6 +35,12 @@ public class GaisClientConfig {
     private String login;
     @Value("${gaisclient.password}")
     private String password;
+
+    @Bean
+    public MetricRegistry metricRegistry() {
+        return new MetricRegistry();
+    }
+
 
     @Bean
     public TProtocolFactory tProtocolFactory() {

@@ -6,6 +6,7 @@ import dispatch.server.thrift.backend.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 import ru.glosav.gais.gateway.util.DateUtil;
 
@@ -17,6 +18,7 @@ import java.util.List;
 
 
 @Data
+@ToString
 @Entity
 @ApiModel(value="Application", description="Модель данных описывающая заявку")
 public class Application {

@@ -2,6 +2,7 @@ package ru.glosav.gais.gateway.dto;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.ToString;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,6 +12,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Data
+@ToString
 @Entity
 public class Session {
     @Id

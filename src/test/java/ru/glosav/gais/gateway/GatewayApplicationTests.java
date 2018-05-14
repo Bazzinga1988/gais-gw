@@ -14,26 +14,26 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+//@RunWith(SpringRunner.class)
+//@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 
 public class GatewayApplicationTests {
 
-    @Autowired
+    //@Autowired
     private WebApplicationContext context;
 
     private MockMvc mockMvc;
 
 
-    @Rule
+    //@Rule
     public final JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation();
 
 
-    @Test
+    //@Test
 	public void contextLoads() {
 	}
 
-    @Before
+    //@Before
     public void init() {
         mockMvc = webAppContextSetup(context)
                 .apply(documentationConfiguration(this.restDocumentation))

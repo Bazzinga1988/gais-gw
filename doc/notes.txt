@@ -31,4 +31,8 @@ docker rm postgres
 -Dspring.config.location=etc/application.yml -Djavax.net.debug=all -Djavax.net.ssl.trustStore=trustStore
 
 
-Вы были зарегистрированы на сайте. Вам присвоен логин 89265281425, установлен пароль 134991 (выделите курсором, чтобы увидеть пароль). Регистрационная информация отправлена на ваш e-mail corop@list.ru и смс сообщением на номер телефона 89265281425
+
+https://monitoring.aoglonass.ru/
+
+
+

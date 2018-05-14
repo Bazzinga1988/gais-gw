@@ -9,11 +9,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.glosav.gais.gateway.dto.Session;
+import ru.glosav.gais.gateway.dto.TransferLog;
 import ru.glosav.gais.gateway.repo.ApplicationRepository;
 import ru.glosav.gais.gateway.repo.SessionRepository;
+import ru.glosav.gais.gateway.repo.TransferLogRepository;
 
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.GenericEntity;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +36,9 @@ public class SessionController {
     @Autowired
     SessionRepository sessionRepository;
 
+    @Autowired
+    TransferLogRepository transferLogRepository;
+
     public static <T> List<T> toList(final Iterable<T> iterable) {
         return StreamSupport.stream(iterable.spliterator(), false)
                 .collect(Collectors.toList());
@@ -47,5 +54,14 @@ public class SessionController {
         return ResponseEntity.ok(target);
     }
 
+    @ApiOperation(value = "Log сессий")
+    @GetMapping(value = {"/log"},
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<?> log(@RequestParam String sessionId) throws ApplicationException {
+        log.debug("SessionController.log:");
+        List<TransferLog> target = new ArrayList<>();
+        transferLogRepository.findBySessionId(sessionId).forEach(target::add);
+        return ResponseEntity.ok(target);
+    }
 
 }

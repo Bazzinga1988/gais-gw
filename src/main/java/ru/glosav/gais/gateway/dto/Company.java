@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
@@ -13,6 +14,7 @@ import java.util.Date;
 import java.util.List;
 
 @Data
+@ToString
 @Entity
 /*
 @Table(uniqueConstraints = {
@@ -29,7 +31,6 @@ public class Company {
     @ApiModelProperty(value = "Название компании", example = "ООО Адам Козлевич")
     private String name;
     @NotNull
-    @Column(unique = true)
     @ApiModelProperty(value = "ИНН компании", example = "155115802")
     private String inn;
     @ApiModelProperty(value = "КПП компании", example = "123423")

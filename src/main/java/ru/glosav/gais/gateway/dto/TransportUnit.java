@@ -5,12 +5,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.ToString;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 
 @Data
+@ToString
 @Entity
 @ApiModel(value="TransportUnit", description="Модель данных описывающая транспортное средство")
 public class TransportUnit {

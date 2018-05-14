@@ -1,5 +1,8 @@
 package ru.glosav.gais.gateway.svc;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import dispatch.server.thrift.backend.*;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -15,10 +18,13 @@ import org.springframework.stereotype.Component;
 import ru.glosav.gais.gateway.cfg.GaisClientConfig;
 import ru.glosav.gais.gateway.dto.Application;
 import ru.glosav.gais.gateway.dto.Company;
+import ru.glosav.gais.gateway.dto.TransferLog;
+import ru.glosav.gais.gateway.repo.TransferLogRepository;
 import ru.glosav.gais.gateway.util.DateUtil;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,28 +38,37 @@ public class GaisConnectorService {
     @Autowired
     private TSSLTransportFactory.TSSLTransportParameters tSSLTransportParameters;
 
+    @Autowired
+    TransferLogRepository transferLogRepository;
+
+    @Resource
+    private MetricRegistry metricRegistry;
+
     private TSocket socket;
     private TTransport transport;
     private TBinaryProtocol protocol;
     private DispatchBackend.Client client;
     private Session session;
 
+
+    private Counter companySuccessCounter = null;
+    private Counter companyErrorCounter = null;
+    private Counter unitSuccessCounter = null;
+    private Counter unitErrorCounter = null;
+
+    private Timer sendTimer = null;
+
+
     @PostConstruct
     public void init() {
         log.debug("GaisConnectorService.init");
+        companySuccessCounter = metricRegistry.counter("SEND_COMPANY_SUCCESS_COUNTER");
+        companyErrorCounter = metricRegistry.counter("SEND_COMPANY_ERROR_COUNTER");
+        unitSuccessCounter = metricRegistry.counter("SEND_UNIT_SUCCESS_COUNTER");
+        unitErrorCounter = metricRegistry.counter("SEND_UNIT_ERROR_COUNTER");
+        sendTimer = metricRegistry.timer("GaisConnectorService::send");
     }
 
-    public void send(Application application) throws TException {
-        log.debug("GaisConnectorService.send: application id: {}", application.getId());
-        ///////////// Находим группу m_groupname /////////////
-        List<Group> groups = client.getRootGroups(session);
-        groups.stream().forEach(group -> log.debug("Group: {}",group));
-
-        Group primaryGroup = groups.get(0);
-        Group russianCarrierGroup = primaryGroup.getTitle().equals(cfg.getGroup()) ?
-                primaryGroup : null;
-        log.debug("russianCarrierGroup found: id: {}, title: {}", russianCarrierGroup.getId(), russianCarrierGroup.getTitle());
-    }
 
     @PreDestroy
     public void destroy() {
@@ -118,12 +133,6 @@ public class GaisConnectorService {
                                 company.getTitle(),
                                 company.getAdditionalFields().getData().get(3).getTitle(), // 3 - address
                                 company.getAdditionalFields().getData().get(3).getValue());
-
-/*
-                        company.getAdditionalFields().getDataIterator().forEachRemaining(adf -> {
-                            log.debug(" >>> storeFieldValue: '{}'=>'{}'", adf.getTitle(), adf.getValue());
-                        });
-*/
                         try {
                             List<MonitoringObject> monitoringObjects =
                                     client.getChildrenMonitoringObjects(session, company.getId(), false);
@@ -144,7 +153,8 @@ public class GaisConnectorService {
     }
 
     public void save(String groupName, Application a) throws Exception {
-        log.debug("GaisConnectorService.save");
+        log.debug("GaisConnectorService.send");
+        final Timer.Context context = sendTimer.time();
         synchronized (client) {
             List<Group> groups = client.getRootGroups(session);
 
@@ -187,12 +197,6 @@ public class GaisConnectorService {
                     .setTitle("Идентификатор ЕГИС ОТБ")
                     .setValue(a.getCompany().getEgisOtbId())); // "ОТБ-1-2"
 
-/*
-            extraFields.add(new StoreFieldValue()
-                    .setTitle("extSessionId")
-                    .setValue(a.getSessionId())); //
-*/
-
             License license = new License();
             // Время истечения лицензии в формате Unix timestamp,
             // 1546214400 соответствует 31.12.2018.
@@ -207,24 +211,41 @@ public class GaisConnectorService {
             license.setUsersLimit(1);
             // создаваемая компания находится во включенном состоянии
             license.setEnabled(true);
+            try {
+                // создается компания-перевозчик с подготовленными параметрами:
+                Group group
+                        = client.createCompanyWithAdditionalFields(session, russianCarrierGroup[0].getId(),
+                        a.getCompany().getName(), // "ООО Адам Козлевич"
+                        license,
+                        new AdditionalFields(extraFields)
+                );
+                companySuccessCounter.inc();
+                TransferLog transferLog = new TransferLog();
+                transferLog.setType(TransferLog.Type.COMPANY);
+                transferLog.setObjId(a.getCompany().getId());
+                transferLog.setSessionId(a.getSessionId());
+                transferLog.setExtId(group.getId());
+                try {
+                    transferLogRepository.save(transferLog);
+                } catch (Exception e) {
+                    log.error("Error save transfer log: {}", transferLog.toString());
+                }
 
-            // создается компания-перевозчик с подготовленными параметрами:
-            Group group
-                    = client.createCompanyWithAdditionalFields(session, russianCarrierGroup[0].getId(),
-                    a.getCompany().getName(), // "ООО Адам Козлевич"
-                    license,
-                    new AdditionalFields(extraFields)
-            );
-
-            createTransportUnits(a.getCompany(), group);
+                createTransportUnits(a.getSessionId(), a.getCompany(), group);
+            } catch (Exception e) {
+                companyErrorCounter.inc();
+                log.warn("Error transfer company id: {}, name: '{}' {}", a.getCompany().getId(), a.getCompany().getName(), e);
+            }
         }
+        context.stop();
     }
 
-    private void createTransportUnits(Company c, Group g) {
+    private void createTransportUnits(String sessionId, Company c, Group g) {
         log.debug("GaisConnectorService.createTransportUnits");
                 Hibernate.initialize(c.getUnits());
                 c.getUnits().stream().forEach(tu -> {
-                    log.debug("Try save TU: {}", tu.getGrn());
+                    log.debug("Try save TU: {}", tu);
+                    tu.setSessionId(sessionId);
                     List<StoreFieldValue> extraFieldsOM = new ArrayList<StoreFieldValue>();
                     // обращаю внимание на то, что значения Title должны добуквенно
                     // соответствовать указанным, а в значения Value подставляться
@@ -254,21 +275,34 @@ public class GaisConnectorService {
                     // предварительной регистрации
                     tracker.setModel("EGTS"); // или "STUB" для псевдо-трекеров на этапе
                     // предварительной регистрации
-                    tracker.addToIdentifier("123123123");
+                    tracker.addToIdentifier(tu.getImei());
 
                     try {
                         MonitoringObject om
                                 = client.createMonitoringObjectWithAdditionalFields(
-                                session, g.getId(),
+                                session,
+                                g.getId(),
                                 tracker,
                                 tu.getGrn(), // ГРЗ
                                 "#00ffff", // цвет отображения объекта в АСМ ЭРА, в формате RGB
                                 "7", // номер иконки объекта в АСМ ЭРА, от "0" до "15"
                                 new AdditionalFields(extraFieldsOM)
                         );
-                        log.debug("Create transport unit '{}' for company '{}'", om.getId(), om.getName());
+                        unitSuccessCounter.inc();
+                        TransferLog transferLog = new TransferLog();
+                        transferLog.setType(TransferLog.Type.TRANSPORT_UNIT);
+                        transferLog.setObjId(tu.getId());
+                        transferLog.setSessionId(sessionId);
+                        transferLog.setExtId(om.getId());
+                        try {
+                            transferLogRepository.save(transferLog);
+                        } catch (Exception e) {
+                            log.error("Error save transfer log: {}", transferLog.toString());
+                        }
+                        log.info("Create transport unit '{}' for company '{}'", om.getId(), om.getName());
                     } catch (TException e) {
-                        log.warn("Error create transport unit '{}' for company '{}'", tu.getGrn(), c.getName());
+                        unitErrorCounter.inc();
+                        log.warn("Error create transport unit '{}' for company '{}'", tu.getGrn(), c.getName(), e);
                     }
 
                 });

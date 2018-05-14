@@ -34,12 +34,12 @@ appender("FILE", RollingFileAppender) {
 
 // ALL, TRACE, DEBUG, INFO, WARN, ERROR, OFF
 
-logger("org.springframework", OFF)
+logger("org.springframework", DEBUG)
 logger("org.springframework.boot", OFF)
 logger("org.springframework.boot.autoconfigure", OFF)
 
 logger("ru.glosav.gais.gateway", DEBUG)
 logger("org.springframework.web", INFO)
 
-root(INFO, ["STDOUT"])
-root(INFO, ["FILE"])
+root(DEBUG, ["STDOUT"])
+root(WARN, ["FILE"])
