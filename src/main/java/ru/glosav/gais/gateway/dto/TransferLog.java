@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
+import javax.annotation.Resource;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
@@ -26,12 +27,21 @@ public class TransferLog {
     private Type type;
     @NotNull
     private long objId;
-    @NotNull
+    @Column
     private String extId;
+    @NotNull
+    private Result result;
+    @Column
+    private String msg;
 
     public enum Type {
         COMPANY,
         TRANSPORT_UNIT
+    }
+
+    public enum Result {
+        SUCCESS,
+        ERROR
     }
 
 }
