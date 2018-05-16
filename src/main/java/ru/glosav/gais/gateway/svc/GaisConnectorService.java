@@ -246,6 +246,9 @@ public class GaisConnectorService {
             tracker.setModel("EGTS"); // или "STUB" для псевдо-трекеров на этапе
             // предварительной регистрации
             tracker.addToIdentifier(tu.getImei());
+            tracker.setPhoneNumber(tu.getMsisdn());
+
+
             TransferLog transferLog = new TransferLog();
             transferLog.setType(TransferLog.Type.TRANSPORT_UNIT);
             transferLog.setObjId(tu.getId());
