@@ -26,7 +26,6 @@ public class TransportUnit {
     @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "COMPANY_ID", referencedColumnName = "ID")
     private Company company;
-
     @JsonIgnore
     private String sessionId;
     @NotNull
@@ -49,13 +48,13 @@ public class TransportUnit {
     @ApiModelProperty(value = "Категория транспортного средства", example = "Первая")
     private String category;
     @NotNull
-    @ApiModelProperty(value = "Идентификационный номер (IMEI) и модель АСН", example = "")
+    @ApiModelProperty(value = "Идентификационный номер (IMEI) и модель АСН", example = "35-419002-389644-3")
     private String imei;
     @NotNull
-    @ApiModelProperty(value = "ICCID USIM-карты", example = "+79162223222")
+    @ApiModelProperty(value = "ICCID USIM-карты", example = "+MMCC IINN NNNN NNNN NN C x")
     private String iccid;
     @NotNull
-    @ApiModelProperty(value = "Абонентский номер USIM-карты", example = "")
+    @ApiModelProperty(value = "Абонентский номер USIM-карты", example = "+79162223222")
     private String msisdn;
 
 }
