@@ -120,13 +120,16 @@ public class GaisConnectorService {
         log.debug("GaisConnectorService.list");
         final Timer.Context context = listCompaniesTimer.time();
         synchronized (client) {
-            List<Group> groups = client.getRootGroups(session);
-            for(Group group: groups){
-                log.debug("Group[ id: {}, title: '{}']", group.getId(), group.getTitle());
+            List<Group> roots = client.getRootGroups(session);
+            for(Group group: roots){
+                log.debug("Root group[ id: {}, title: '{}']", group.getId(), group.getTitle());
                 try {
-                    List<Group> companyList = client.getChildrenGroups(session, group.getId(), false);
-                    for(Group company: companyList) {
-                        log.debug("Company: [{}, {}]", company.getId(), company.getTitle());
+                    List<Group> companies = client.getChildrenGroups(session, group.getId(), true);
+                    for(Group company: companies) {
+                        log.debug("Group: [{}, {}]", company.getId(), company.getTitle());
+                        if(company.isSet(Group._Fields.ADDITIONAL_FIELDS)) {
+
+                        }
                     }
                 } catch (TException e) {
                     log.error("Error obtain company", e);
