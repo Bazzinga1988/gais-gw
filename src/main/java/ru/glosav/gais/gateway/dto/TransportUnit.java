@@ -29,6 +29,8 @@ public class TransportUnit {
     @JsonIgnore
     private String sessionId;
     @NotNull
+    private String sourceId;
+    @NotNull
     @Column(unique = true)
     @ApiModelProperty(value = "Государственный регистрационный знак", example = "A-1234-дам")
     private String grn;

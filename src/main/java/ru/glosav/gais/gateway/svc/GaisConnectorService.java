@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import ru.glosav.gais.gateway.cfg.GaisClientConfig;
 import ru.glosav.gais.gateway.dto.Application;
 import ru.glosav.gais.gateway.dto.Company;
