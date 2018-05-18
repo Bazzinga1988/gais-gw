@@ -30,7 +30,7 @@ docker rm postgres
 
 -Dspring.config.location=etc/application.yml -Djavax.net.debug=all -Djavax.net.ssl.trustStore=trustStore
 
-
+10.0.5.201
 
 https://monitoring.aoglonass.ru/
 
