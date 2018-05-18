@@ -31,7 +31,7 @@ public class JobsConfig {
         return TriggerBuilder.newTrigger().forJob(job)
                 .withIdentity("Gais_Transfer_Trigger")
                 .withDescription("Gais Transfer Job trigger")
-                .withSchedule(simpleSchedule().repeatForever().withIntervalInSeconds(interval))
+                .withSchedule(simpleSchedule().withIntervalInSeconds(interval).repeatForever())
                 .build();
     }
 

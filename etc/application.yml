@@ -9,7 +9,7 @@ jmx:
 spring:
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: create-drop
 
     database-platform: org.hibernate.dialect.PostgreSQL95Dialect
     show-sql: true
@@ -27,7 +27,7 @@ spring:
 gaisclient:
     group: "Тест Российские перевозчики"
     #host: 10.77.205.98 # internal via Glosav - Glonass VipNet
-    host: 193.232.47.4  # external public Glonass
+    host: 193.232.47.4  # external public Glonass - 193.232.47.4
     port: 19991
     login: testintegration
     password: testintegration

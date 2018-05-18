@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.glosav.gais.gateway.cfg.GaisClientConfig;
 import ru.glosav.gais.gateway.dto.Application;
@@ -29,7 +30,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+@Service
 public class GaisConnectorService {
     Logger log = LoggerFactory.getLogger(GaisConnectorService.class);
 
@@ -85,21 +86,21 @@ public class GaisConnectorService {
             log.debug("Use SSL socket");
             socket = TSSLTransportFactory.getClientSocket(
                     cfg.getHost(), cfg.getPort(),
-                    30000, tSSLTransportParameters);
+                    1000 * 60 * 30, tSSLTransportParameters); // todo move to ext cfg
         } else {
             log.debug("Use no SSL socket");
             socket = new TSocket(cfg.getHost(), cfg.getPort());
-            socket.setTimeout(5000);
+            socket.setTimeout(30000);
             socket.open();
         }
-        log.debug("GaisConnectorService.connect: socket on {}:{} opened", cfg.getHost(), cfg.getPort());
+        log.debug("GaisConnectorService.connect: socket on {}:{} is opened", cfg.getHost(), cfg.getPort());
         transport = new TFramedTransport(socket);
-        log.debug("GaisConnectorService.connect: Framed transport on {}:{} obtained", cfg.getHost(), cfg.getPort());
+        log.debug("GaisConnectorService.connect: Framed transport on {}:{} is obtained", cfg.getHost(), cfg.getPort());
         protocol = new TBinaryProtocol(transport, true, true);
-        log.debug("GaisConnectorService.connect: Binary protocol on {}:{} obtained", cfg.getHost(), cfg.getPort());
+        log.debug("GaisConnectorService.connect: Binary protocol on {}:{} is obtained", cfg.getHost(), cfg.getPort());
         client = new DispatchBackend.Client.Factory().getClient(protocol);
-        log.debug("GaisConnectorService.connect: Dispatch backend client on {}:{} up", cfg.getHost(), cfg.getPort());
-        session = client.login(cfg.getLogin(), cfg.getPassword(), true);
+        log.debug("GaisConnectorService.connect: Dispatch backend client on {}:{} is up", cfg.getHost(), cfg.getPort());
+        session = client.login(cfg.getLogin(), cfg.getPassword(), false);
     }
 
     public void disconnect() {
@@ -107,12 +108,19 @@ public class GaisConnectorService {
         synchronized (client) {
             try {
                 client.logout(session);
-                if (socket != null && socket.isOpen()) {
-                    socket.close();
-                }
-                log.debug("GiasConnectorService.disconnect: socket on {}:{} closed", cfg.getHost(), cfg.getPort());
+                session.clear();
+                transport.close();
+                log.debug("GiasConnectorService.disconnect: logout on {}:{} closed", cfg.getHost(), cfg.getPort());
             } catch (Exception e) {
-                log.warn("Incorrect close TSocket on {}:{}", cfg.getHost(), cfg.getPort(), e);
+                log.warn("Incorrect logout session on {}:{}", cfg.getHost(), cfg.getPort(), e);
+            } finally {
+                if (socket != null && socket.isOpen()) {
+                    try {
+                        socket.close();
+                    } catch (Exception e) {
+                        log.warn("Incorrect close TSocket on {}:{}", cfg.getHost(), cfg.getPort(), e);
+                    }
+                }
             }
         }
     }
@@ -125,7 +133,7 @@ public class GaisConnectorService {
             for(Group group: roots){
                 log.debug("Root group[ id: {}, title: '{}']", group.getId(), group.getTitle());
                 try {
-                    List<Group> companies = client.getChildrenGroups(session, group.getId(), true);
+                    List<Group> companies = client.getChildrenGroups(session, group.getId(), false);
                     for(Group company: companies) {
                         log.debug("Group: [{}, {}]", company.getId(), company.getTitle());
                         if(company.isSet(Group._Fields.ADDITIONAL_FIELDS)) {
@@ -156,9 +164,15 @@ public class GaisConnectorService {
                 final Group[] russianCarrierGroup = new Group[1];
 
                 groups.stream().forEach(group -> {
-                    if (group.getTitle().equals(groupName))
+                    if (group.getTitle() != null && group.getTitle().equals(groupName)) {
                         russianCarrierGroup[0] = group;
+                    }
+
                 });
+                if( russianCarrierGroup[0] == null ) {
+                    log.error("Group not found: {}", groupName);
+                    return;
+                }
 
                 List<StoreFieldValue> extraFields = fillStoreFieldValue(a);
 
@@ -185,6 +199,7 @@ public class GaisConnectorService {
                             license,
                             new AdditionalFields(extraFields)
                     );
+                    log.info("Success send company id: {}, name: '{}' {}", a.getCompany().getId(), a.getCompany().getName());
                     transferLog.setExtId(group.getId());
                     transferLog.setResult(TransferLog.Result.SUCCESS);
                     transferLog.setMsg(TransferLog.Result.SUCCESS.name());
@@ -250,7 +265,7 @@ public class GaisConnectorService {
             tracker.setModel("EGTS"); // или "STUB" для псевдо-трекеров на этапе
             // предварительной регистрации
             tracker.addToIdentifier(tu.getImei());
-            tracker.setPhoneNumber(tu.getMsisdn());
+            //tracker.setPhoneNumber(tu.getMsisdn());
 
 
             TransferLog transferLog = new TransferLog();

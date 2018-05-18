@@ -14,6 +14,7 @@ import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication
+
 /*
 @ComponentScan(
 		basePackages = "ru.glosav.gais.gateway",
@@ -22,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 				pattern="ru.glosav.gais.gateway.svc.GaisConnectorService*")
 )
 */
+
 public class GatewayApplication {
 
 	@Resource

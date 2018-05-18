@@ -28,6 +28,8 @@ public class Company {
     @JsonIgnore
     private long id;
     @NotNull
+    private String sourceId;
+    @NotNull
     @ApiModelProperty(value = "Название компании", example = "ООО Адам Козлевич")
     private String name;
     @NotNull

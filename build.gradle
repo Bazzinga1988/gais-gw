@@ -17,7 +17,7 @@ buildscript {
 	dependencies {
         classpath("io.franzbecker:gradle-lombok:1.13")
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-		classpath("gradle.plugin.org.jruyi.gradle:thrift-gradle-plugin:0.4.0")
+		//classpath("gradle.plugin.org.jruyi.gradle:thrift-gradle-plugin:0.4.0")
 		classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.7")
 	}
 }
@@ -29,7 +29,7 @@ apply plugin: 'idea'
 apply plugin: 'maven'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
-apply plugin: "org.jruyi.thrift"
+//apply plugin: "org.jruyi.thrift"
 apply plugin: 'org.asciidoctor.convert'
 
 group = 'ru.glosav.gais'
@@ -67,7 +67,7 @@ dependencies {
 	//compile('org.springframework.restdocs:spring-restdocs-mockmvc')
 
 	compile('org.springframework.retry:spring-retry')
-    compile('org.apache.thrift:libthrift:0.11.0')
+    compile('org.apache.thrift:libthrift:0.10.0')
 	compile('org.postgresql:postgresql')
 
     // Генерация документации REST-сервисов
@@ -109,6 +109,8 @@ ext {
     snippetsDir = file('build/generated-snippets')
 }
 
+/*
+
 compileThrift {
     thriftExecutable "thrift"
     sourceDir "src/main/thrift"
@@ -125,6 +127,7 @@ compileThrift {
 
     generator 'java', 'private-members'
 }
+*/
 
 asciidoctor {
     dependsOn test
