@@ -43,6 +43,7 @@ public class GaisTransferJob implements Job {
     public void execute(JobExecutionContext context) throws JobExecutionException {
         log.debug("GaisTransferJob.execute");
         if(lock.tryLock()) {
+            gcs.loadCompanies();
             if (!sessionRepository.findByHandled(false).isEmpty()) {
                 //GaisConnectorService gcs = ctx.getBean(GaisConnectorService.class);
                 try {

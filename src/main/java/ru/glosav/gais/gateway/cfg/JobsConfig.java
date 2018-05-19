@@ -9,6 +9,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.glosav.gais.gateway.jobs.GaisTransferJob;
 
+import java.time.Instant;
+import java.util.Date;
+
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 
 @Configuration
@@ -31,8 +34,14 @@ public class JobsConfig {
         return TriggerBuilder.newTrigger().forJob(job)
                 .withIdentity("Gais_Transfer_Trigger")
                 .withDescription("Gais Transfer Job trigger")
-                .withSchedule(simpleSchedule().withIntervalInSeconds(interval).repeatForever())
-                .build();
+                .withSchedule(
+                        simpleSchedule()
+                                .withIntervalInSeconds(interval)
+                                .repeatForever())
+                .startAt(
+                        Date.from(
+                                Instant.now().plusSeconds(30))
+                ).build();
     }
 
 

@@ -4,6 +4,7 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import dispatch.server.thrift.backend.*;
+import javafx.util.Pair;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.transport.TFramedTransport;
@@ -14,9 +15,7 @@ import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.glosav.gais.gateway.cfg.GaisClientConfig;
 import ru.glosav.gais.gateway.dto.Application;
 import ru.glosav.gais.gateway.dto.Company;
@@ -29,6 +28,7 @@ import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class GaisConnectorService {
@@ -42,6 +42,9 @@ public class GaisConnectorService {
 
     @Autowired
     TransferLogRepository transferLogRepository;
+
+    @Autowired
+    private CompanyCache companyCache;
 
     @Resource
     private MetricRegistry metricRegistry;
@@ -61,6 +64,7 @@ public class GaisConnectorService {
     private Timer sendTimer = null;
     private Timer listCompaniesTimer = null;
 
+    private boolean companiesLoaded = false;
 
     @PostConstruct
     public void init() {
@@ -71,6 +75,34 @@ public class GaisConnectorService {
         unitErrorCounter = metricRegistry.counter("SEND_UNIT_ERROR_COUNTER");
         sendTimer = metricRegistry.timer("GaisConnectorService::send");
         listCompaniesTimer = metricRegistry.timer("GaisConnectorService::listCompanies");
+
+    }
+
+    public void loadCompanies() {
+        if (!companiesLoaded) {
+            log.debug("GaisConnectorService.loadCompanies");
+            try {
+                connect();
+                // id, title
+                List<Pair<String, String>> pairs = list();
+                companyCache.clear();
+                pairs.stream().forEach(
+                        pair -> {
+                            Optional<String> optionalCompany = companyCache.find(pair.getValue());
+                            if (!optionalCompany.isPresent()) {
+                                companyCache.add(pair.getValue(), pair.getKey());
+                                log.info("Added company '{}' with id: {} in chache.", pair.getValue(), pair.getKey());
+                            }
+
+                        }
+                );
+                companiesLoaded = true;
+            } catch (Exception e) {
+                throw new RuntimeException("Error load company cache:", e);
+            } finally {
+                disconnect();
+            }
+        }
     }
 
 
@@ -125,20 +157,17 @@ public class GaisConnectorService {
         }
     }
 
-    public void list() throws Exception {
+    public List<Pair<String, String>> list() throws Exception {
         log.debug("GaisConnectorService.list");
         final Timer.Context context = listCompaniesTimer.time();
+        List<Pair<String, String>> companiesPairList = new ArrayList<>();
         synchronized (client) {
             List<Group> roots = client.getRootGroups(session);
             for(Group group: roots){
-                log.debug("Root group[ id: {}, title: '{}']", group.getId(), group.getTitle());
                 try {
                     List<Group> companies = client.getChildrenGroups(session, group.getId(), false);
                     for(Group company: companies) {
-                        log.debug("Group: [{}, {}]", company.getId(), company.getTitle());
-                        if(company.isSet(Group._Fields.ADDITIONAL_FIELDS)) {
-
-                        }
+                        companiesPairList.add(new Pair<>(company.getId(), company.getTitle()));
                     }
                 } catch (TException e) {
                     log.error("Error obtain company", e);
@@ -146,6 +175,7 @@ public class GaisConnectorService {
             }
         }
         context.stop();
+        return companiesPairList;
     }
 
     public void save(String groupName, Application a) throws Exception {
@@ -190,22 +220,31 @@ public class GaisConnectorService {
                 license.setUsersLimit(1);
                 // создаваемая компания находится во включенном состоянии
                 license.setEnabled(true);
-
+                String companyExtId;
                 try {
                     // создается компания-перевозчик с подготовленными параметрами:
-                    Group group
-                            = client.createCompanyWithAdditionalFields(session, russianCarrierGroup[0].getId(),
-                            a.getCompany().getName(), // "ООО Адам Козлевич"
-                            license,
-                            new AdditionalFields(extraFields)
-                    );
+                    Optional<String> oc = companyCache.find(a.getCompany().getName());
+                    if (oc.isPresent()) {
+                        log.info("Company '{}' found in chache", a.getCompany().getName());
+                        companyExtId = oc.get();
+                    } else {
+                        Group group
+                                = client.createCompanyWithAdditionalFields(session, russianCarrierGroup[0].getId(),
+                                a.getCompany().getName(), // "ООО Адам Козлевич"
+                                license,
+                                new AdditionalFields(extraFields)
+                        );
+                        companyCache.add(a.getCompany().getName(), group.getId());
+                        log.info("Company '{}' added in chache", a.getCompany().getName());
+                        companyExtId = group.getId();
+                    }
                     log.info("Success send company id: {}, name: '{}' {}", a.getCompany().getId(), a.getCompany().getName());
-                    transferLog.setExtId(group.getId());
+                    transferLog.setExtId(companyExtId);
                     transferLog.setResult(TransferLog.Result.SUCCESS);
                     transferLog.setMsg(TransferLog.Result.SUCCESS.name());
                     companySuccessCounter.inc();
                     saveLog(transferLog);
-                    createTransportUnits(a.getSessionId(), a.getCompany(), group);
+                    createTransportUnits(a.getSessionId(), a.getCompany(), companyExtId);
                 } catch (Exception e) {
                     companyErrorCounter.inc();
                     fillErrorLogCompany(a, transferLog, e);
@@ -229,12 +268,14 @@ public class GaisConnectorService {
         return transferLog;
     }
 
-    private void createTransportUnits(String sessionId, Company c, Group g) {
+    private void createTransportUnits(String sessionId, Company c, String groupId) {
         log.debug("GaisConnectorService.createTransportUnits");
         Hibernate.initialize(c.getUnits());
         c.getUnits().stream().forEach(tu -> {
-            log.debug("Try save TU: {}", tu);
             tu.setSessionId(sessionId);
+            tu.setCompanyId(c.getId());
+            log.debug("Try save TU: {}", tu);
+
             List<StoreFieldValue> extraFieldsOM = new ArrayList<StoreFieldValue>();
             // обращаю внимание на то, что значения Title должны добуквенно
             // соответствовать указанным, а в значения Value подставляться
@@ -265,7 +306,7 @@ public class GaisConnectorService {
             tracker.setModel("EGTS"); // или "STUB" для псевдо-трекеров на этапе
             // предварительной регистрации
             tracker.addToIdentifier(tu.getImei());
-            //tracker.setPhoneNumber(tu.getMsisdn());
+            tracker.setPhoneNumber(tu.getMsisdn());
 
 
             TransferLog transferLog = new TransferLog();
@@ -276,19 +317,19 @@ public class GaisConnectorService {
                 MonitoringObject om
                         = client.createMonitoringObjectWithAdditionalFields(
                         session,
-                        g.getId(),
+                        groupId,
                         tracker,
                         tu.getGrn(), // ГРЗ
                         "#00ffff", // цвет отображения объекта в АСМ ЭРА, в формате RGB
                         "7", // номер иконки объекта в АСМ ЭРА, от "0" до "15"
                         new AdditionalFields(extraFieldsOM)
                 );
+                log.info("Success send transport unit '{}' for company '{}'", tu.getId(), c.getId());
                 transferLog.setExtId(om.getId());
                 transferLog.setResult(TransferLog.Result.SUCCESS);
                 transferLog.setMsg(TransferLog.Result.SUCCESS.name());
                 unitSuccessCounter.inc();
                 saveLog(transferLog);
-                log.info("Create transport unit '{}' for company '{}'", om.getId(), om.getName());
             } catch (TException e) {
                 transferLog.setExtId(null);
                 transferLog.setResult(TransferLog.Result.ERROR);

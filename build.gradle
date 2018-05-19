@@ -55,8 +55,10 @@ repositories {
 }
 
 dependencies {
+
 	compile('org.springframework.boot:spring-boot-starter-actuator')
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')
+	compile('org.springframework:spring-jdbc')
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.springframework.boot:spring-boot-starter-webflux')
 	compile('org.springframework.boot:spring-boot-starter-jersey')
@@ -68,7 +70,7 @@ dependencies {
 
 	compile('org.springframework.retry:spring-retry')
     compile('org.apache.thrift:libthrift:0.10.0')
-	compile('org.postgresql:postgresql')
+	compile('org.postgresql:postgresql:42.2.2')
 
     // Генерация документации REST-сервисов
     compile group: 'org.springframework.restdocs', name: 'spring-restdocs-core', version: "${springBootVersion}"
@@ -83,7 +85,7 @@ dependencies {
     // Groovy dependencies
     compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.13'
 
-	compileOnly('org.springframework.boot:spring-boot-configuration-processor')
+    compileOnly('org.springframework.boot:spring-boot-configuration-processor')
     compileOnly('org.projectlombok:lombok:1.16.20')
 
 	testCompile('org.springframework.boot:spring-boot-starter-test')

@@ -3,6 +3,7 @@ package ru.glosav.gais.gateway.ctrl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,10 @@ public class ApplicationController {
     @Autowired
     private SessionRepository sessionRepository;
 
+    @Autowired
+    private GaisConnectorService gcs;
+
+
     @ApiOperation(value = "Сервис регистрации заявки в ГАИС")
     @PostMapping(value = { "/register"},
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -51,9 +56,9 @@ public class ApplicationController {
         log.debug("ApplicationController.register: {}", application);
         Session session = new Session();
         application.setSessionId(session.getId());
-        sessionRepository.save(session);
         Application app = applicationRepository.save(application);
         session.setAppId(app.getId());
+        sessionRepository.save(session);
         return ResponseEntity.status(HttpStatus.CREATED).body(session);
     }
 
@@ -68,7 +73,7 @@ public class ApplicationController {
         return ResponseEntity.ok(target);
     }
 
-    @ApiOperation(value = "Список заявок в глонас")
+    @ApiOperation(value = "Список компаний в глонас")
     @GetMapping(value = {"/rlist"},
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.FOUND)
@@ -76,20 +81,21 @@ public class ApplicationController {
         log.debug("ApplicationController.rlist:");
         List<Application> target = new ArrayList<>();
         applicationRepository.findAll().forEach(target::add);
-        GaisConnectorService gcs = ctx.getBean(GaisConnectorService.class);
+        //GaisConnectorService gcs = ctx.getBean(GaisConnectorService.class);
+        List<Pair<String, String>> companies = new ArrayList<>();
         try {
             gcs.connect();
-            gcs.list();
+            companies = gcs.list();
         } catch (Exception e) {
             log.error("Error in rlist", e);
+        } finally {
+            try {
+                gcs.disconnect();
+            } catch (Exception e) {
+                log.warn("Error disconnect: ", e);
+            }
         }
-
-         try {
-             gcs.disconnect();
-         } catch (Exception e) {
-
-         }
-        return ResponseEntity.ok("Ok");
+        return ResponseEntity.ok(companies);
     }
 
 }

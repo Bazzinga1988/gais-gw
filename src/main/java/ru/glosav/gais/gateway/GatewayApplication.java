@@ -6,24 +6,13 @@ import com.codahale.metrics.Slf4jReporter;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
+
 @SpringBootApplication
-
-/*
-@ComponentScan(
-		basePackages = "ru.glosav.gais.gateway",
-		excludeFilters=@ComponentScan.Filter(
-				type = FilterType.REGEX,
-				pattern="ru.glosav.gais.gateway.svc.GaisConnectorService*")
-)
-*/
-
 public class GatewayApplication {
 
 	@Resource

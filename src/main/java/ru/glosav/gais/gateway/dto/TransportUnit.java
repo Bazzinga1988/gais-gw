@@ -22,10 +22,8 @@ public class TransportUnit {
     private long id;
 
     @JsonIgnore
-    //@ManyToOne(fetch = FetchType.LAZY)
-    @ManyToOne(cascade = {CascadeType.ALL})
-    @JoinColumn(name = "COMPANY_ID", referencedColumnName = "ID")
-    private Company company;
+    @Column
+    private long companyId;
     @JsonIgnore
     private String sessionId;
     @NotNull

@@ -9,6 +9,7 @@ jmx:
 spring:
   jpa:
     hibernate:
+      naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
       ddl-auto: create-drop
 
     database-platform: org.hibernate.dialect.PostgreSQL95Dialect
@@ -19,13 +20,17 @@ spring:
           # Fix Postgres JPA Error:
           # Method org.postgresql.jdbc.PgConnection.createClob() is not yet implemented.
           use_jdbc_metadata_defaults: false
+
   datasource:
     url: jdbc:postgresql://localhost:5432/ggdb
+    driver-class-name: org.postgresql.Driver
+    testWhileIdle: true
+    validationQuery: "SELECT 1"
     username: postgres
     password: postgres
 
 gaisclient:
-    group: "Тест Российские перевозчики"
+    group: 'Тест Российские перевозчики'
     #host: 10.77.205.98 # internal via Glosav - Glonass VipNet
     host: 193.232.47.4  # external public Glonass - 193.232.47.4
     port: 19991
