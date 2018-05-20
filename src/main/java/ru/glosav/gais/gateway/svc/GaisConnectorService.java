@@ -234,11 +234,12 @@ public class GaisConnectorService {
                                 license,
                                 new AdditionalFields(extraFields)
                         );
+
+                        log.info("Success send company id: {}, name: '{}' {}", a.getCompany().getId(), a.getCompany().getName());
                         companyCache.add(a.getCompany().getName(), group.getId());
                         log.info("Company '{}' added in chache", a.getCompany().getName());
                         companyExtId = group.getId();
                     }
-                    log.info("Success send company id: {}, name: '{}' {}", a.getCompany().getId(), a.getCompany().getName());
                     transferLog.setExtId(companyExtId);
                     transferLog.setResult(TransferLog.Result.SUCCESS);
                     transferLog.setMsg(TransferLog.Result.SUCCESS.name());
