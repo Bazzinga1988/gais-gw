@@ -225,8 +225,9 @@ public class GaisConnectorService {
                     // создается компания-перевозчик с подготовленными параметрами:
                     Optional<String> oc = companyCache.find(a.getCompany().getName());
                     if (oc.isPresent()) {
-                        log.info("Company '{}' found in chache", a.getCompany().getName());
+                        log.info("Company '{}' found in cache", a.getCompany().getName());
                         companyExtId = oc.get();
+                        transferLog.setMsg(TransferLog.Result.SUCCESS.name() + ": from cache");
                     } else {
                         Group group
                                 = client.createCompanyWithAdditionalFields(session, russianCarrierGroup[0].getId(),
@@ -235,14 +236,14 @@ public class GaisConnectorService {
                                 new AdditionalFields(extraFields)
                         );
 
-                        log.info("Success send company id: {}, name: '{}' {}", a.getCompany().getId(), a.getCompany().getName());
+                        log.info("Success send company id: {}, name: '{}' ", a.getCompany().getId(), a.getCompany().getName());
                         companyCache.add(a.getCompany().getName(), group.getId());
                         log.info("Company '{}' added in chache", a.getCompany().getName());
                         companyExtId = group.getId();
+                        transferLog.setMsg(TransferLog.Result.SUCCESS.name() + ": added to server");
                     }
                     transferLog.setExtId(companyExtId);
                     transferLog.setResult(TransferLog.Result.SUCCESS);
-                    transferLog.setMsg(TransferLog.Result.SUCCESS.name());
                     companySuccessCounter.inc();
                     saveLog(transferLog);
                     createTransportUnits(a.getSessionId(), a.getCompany(), companyExtId);
@@ -250,7 +251,7 @@ public class GaisConnectorService {
                     companyErrorCounter.inc();
                     fillErrorLogCompany(a, transferLog, e);
                     saveLog(transferLog);
-                    log.warn("Error send company id: {}, name: '{}' {}", a.getCompany().getId(), a.getCompany().getName(), e);
+                    log.warn("Error send company id: {}, name: '{}', err: {}", a.getCompany().getId(), a.getCompany().getName(), e.getMessage());
                 }
             } catch (Exception e) {
                 saveLog(fillErrorLogCompany(a, transferLog, e));
@@ -337,7 +338,7 @@ public class GaisConnectorService {
                 transferLog.setMsg(TransferLog.Result.ERROR.name() + ": " + e.getMessage());
                 saveLog(transferLog);
                 unitErrorCounter.inc();
-                log.warn("Error send transport unit '{}' for company '{}'", tu.getGrn(), c.getName(), e);
+                log.warn("Error send transport unit '{}' for company '{}', err: {}", tu.getGrn(), c.getName(), e.getMessage());
             }
         });
     }

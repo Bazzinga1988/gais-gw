@@ -29,7 +29,7 @@ public class TransportUnit {
     @NotNull
     private String sourceId;
     @NotNull
-    @Column(unique = true)
+    @Column
     @ApiModelProperty(value = "Государственный регистрационный знак", example = "A-1234-дам")
     private String grn;
     @NotNull

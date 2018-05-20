@@ -19,4 +19,20 @@ where
   and
   company_units.company_id = company.id
 order by
-  company.name, transport_unit.grn
+  company.name, transport_unit.grn;
+
+select
+  transfer_log.id,
+  transfer_log.obj_id,
+  transfer_log.msg,
+  company_units.company_id,
+  company.name
+from transfer_log, company_units, company
+where
+  transfer_log.obj_id = company_units.company_id
+  and
+  transfer_log.result = 1 and transfer_log.type = 0
+  and
+  company_units.company_id = company.id
+order by
+  company.name
