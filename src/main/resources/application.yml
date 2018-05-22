@@ -36,8 +36,6 @@ gaisclient:
     port: 19991
     login: glosavintegration
     password: glvI17_Gr0n
-    #login: agent_test
-    #password: test123
     transfer:
       job:
         interval: 60
