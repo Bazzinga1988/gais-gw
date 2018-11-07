@@ -4,7 +4,6 @@ System.properties.put("spring.config.location", "etc/application.yml")
 
 buildscript {
 	ext {
-		//springBootVersion = '2.1.0.BUILD-SNAPSHOT'
 		springBootVersion = '2.0.1.RELEASE'
 	}
 	repositories {
@@ -33,7 +32,7 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: 'org.asciidoctor.convert'
 
 group = 'ru.glosav.gais'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -93,8 +92,6 @@ dependencies {
 
     asciidoctor group: 'org.springframework.restdocs', name: 'spring-restdocs-asciidoctor', version: "${springBootVersion}"
     testCompile group: 'org.springframework.restdocs', name: 'spring-restdocs-mockmvc'
-
-
 }
 
 ext {
