@@ -1,5 +1,41 @@
 # gais-gw
 Зависимости:
+/**
+* Тип данных
+*/
+private String type;
+
+/**
+* Источник данных
+*/
+private int source;
+
+/**
+* Потребитель данных
+*/
+private int destination;
+
+/**
+* Тип действия
+*/
+private int action;
+
+/**
+* Время отправки
+*/
+private LocalDateTime utc;
+
+/**
+* Пользователь
+*/
+private String user;
+
+/**
+* Данные в формате JSON
+*/
+private String payload;
+
+
 
 gc-java-common: 0.7.4-SNAPSHOT
 
